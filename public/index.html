@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>视频管理</title>
+</head>
+<body>
+    <h1>我的视频库</h1>
+    <div id="list"></div>
+
+    <video id="player" controls width="600"></video>
+
+    <script>
+        fetch('/api/videos')
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('list');
+
+                data.forEach(v => {
+                    const btn = document.createElement('button');
+                    btn.innerText = v;
+
+                    btn.onclick = () => {
+                        document.getElementById('player').src = '/videos/' + v;
+                    };
+
+                    list.appendChild(btn);
+                    list.appendChild(document.createElement('br'));
+                });
+            });
+    </script>
+</body>
+</html>
