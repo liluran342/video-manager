@@ -1,3 +1,4 @@
+//js/downloader.js (下载模块)
 import { scanLibrary } from './library.js';
 
 let alertedDownloads = new Set();

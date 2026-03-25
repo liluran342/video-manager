@@ -1,3 +1,4 @@
+//js/main.js (入口模块)
 import { loadConfig, saveConfig } from './config.js';
 import { loadVideos, deleteVideo, scanLibrary } from './library.js';
 import { initPlayer, closePlayer } from './player.js';

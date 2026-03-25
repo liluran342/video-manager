@@ -1,0 +1,302 @@
+﻿LOG 2026/03/25
+Save Path: C:\Users\Administrator\video-manager\Logs
+Task Start: 2026/03/25 19:18:20
+Task CommandLine: N_m3u8DL-RE.exe https://t26.cdn2020.com/video/m3u8/2024/03/08/2f77e614/index.m3u8 --save-dir E:\整理 --save-name 糖心Vlog.猛操极品骚女友-捅主任 --auto-select --del-after-done -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+19:18:20.416 INFO : N_m3u8DL-RE (Beta version) 20251029
+19:18:20.416 EXTRA: ffmpeg => E:\下载\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\bin\ffmpeg.exe
+19:18:20.416 EXTRA: User-Defined Header => user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+19:18:20.417 INFO : 加载URL: https://t26.cdn2020.com/video/m3u8/2024/03/08/2f77e614/index.m3u8
+19:18:23.335 INFO : 内容匹配: HTTP Live Streaming
+19:18:23.336 INFO : 正在解析媒体信息...
+19:18:23.339 WARN : 写出meta json
+19:18:23.340 INFO : 已解析, 共计 1 条媒体流, 基本流 1 条, 可选音频流 0 条, 可选字幕流 0 条
+19:18:23.340 INFO : Vid Kbps | 151 Segments | ~21m12s
+19:18:23.341 INFO : 已选择的流:
+19:18:23.341 INFO : Vid Kbps | 151 Segments | ~21m12s
+19:18:23.341 WARN : 写出meta json
+19:18:23.347 INFO : 保存文件名: 糖心Vlog.猛操极品骚女友-捅主任
+19:18:23.348 INFO : 开始下载...Vid Kbps
+19:18:26.831 WARN : 读取媒体信息...
+19:18:27.025 INFO : [0x100]: Video, h264 (High) ([27][0][0][0]), 1280x720, 24 fps
+19:18:27.025 INFO : [0x101]: Audio, aac (LC) ([15][0][0][0]), 126 kb/s
+19:18:50.556 INFO : 调用ffmpeg合并中...
+19:18:50.586 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 842250).
+19:18:50.586 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.588 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 1562250).
+19:18:50.588 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.589 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 2102250).
+19:18:50.589 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.592 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 3632250).
+19:18:50.592 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.594 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 4442250).
+19:18:50.594 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.596 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 5252250).
+19:18:50.596 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.597 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 5882250).
+19:18:50.597 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.599 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 6422250).
+19:18:50.599 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.601 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 7772250).
+19:18:50.602 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.603 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 8312250).
+19:18:50.603 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.605 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 9032250).
+19:18:50.605 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.606 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 9482250).
+19:18:50.606 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.607 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 9932250).
+19:18:50.608 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.609 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 10472250).
+19:18:50.609 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.609 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 10652250).
+19:18:50.610 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.611 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 11102250).
+19:18:50.611 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.612 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 11477250).
+19:18:50.612 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.614 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 12032250).
+19:18:50.614 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.615 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 12632250).
+19:18:50.615 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.616 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 13172250).
+19:18:50.617 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.617 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 13622250).
+19:18:50.618 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.619 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 14072250).
+19:18:50.621 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.621 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 14792250).
+19:18:50.621 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.622 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 15152250).
+19:18:50.622 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.623 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 15512250).
+19:18:50.623 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.624 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 16142250).
+19:18:50.625 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.626 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 16772250).
+19:18:50.626 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.628 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 17852250).
+19:18:50.628 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.632 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 19382250).
+19:18:50.632 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.634 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 20192250).
+19:18:50.634 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.636 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 21002250).
+19:18:50.636 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.638 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 21722250).
+19:18:50.638 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.640 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 22442250).
+19:18:50.640 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.641 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 23252250).
+19:18:50.642 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.643 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 24062250).
+19:18:50.644 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.645 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 24962250).
+19:18:50.645 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.647 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 25682250).
+19:18:50.647 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.649 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 26312250).
+19:18:50.649 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.650 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 26852250).
+19:18:50.650 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.652 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 27572250).
+19:18:50.652 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.655 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 28832250).
+19:18:50.655 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.657 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 29462250).
+19:18:50.657 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.659 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 30272250).
+19:18:50.659 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.660 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 30902250).
+19:18:50.661 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.662 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 31442250).
+19:18:50.662 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.664 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 32162250).
+19:18:50.664 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.666 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 32882250).
+19:18:50.666 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.667 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 33512250).
+19:18:50.667 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.668 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 33996000).
+19:18:50.669 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.670 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 34682250).
+19:18:50.670 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.673 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 36212250).
+19:18:50.673 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.674 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 37022250).
+19:18:50.675 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.676 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 37652250).
+19:18:50.676 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.677 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 38372250).
+19:18:50.678 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.679 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 39002250).
+19:18:50.679 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.681 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 39902250).
+19:18:50.681 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.682 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 40442250).
+19:18:50.682 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.684 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 41162250).
+19:18:50.684 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.685 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 41702250).
+19:18:50.685 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.687 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 42422250).
+19:18:50.687 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.689 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 43232250).
+19:18:50.689 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.691 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 44132250).
+19:18:50.691 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.693 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 45032250).
+19:18:50.693 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.694 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 45752250).
+19:18:50.695 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.697 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 46472250).
+19:18:50.697 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.698 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 47282250).
+19:18:50.699 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.700 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 47912250).
+19:18:50.700 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.702 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 48632250).
+19:18:50.702 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.703 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 49262250).
+19:18:50.703 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.705 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 50102250).
+19:18:50.705 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.707 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 51002250).
+19:18:50.707 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.709 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 51872250).
+19:18:50.709 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.711 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 52772250).
+19:18:50.711 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.713 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 53672250).
+19:18:50.713 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.715 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 54572250).
+19:18:50.715 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.717 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 55472250).
+19:18:50.717 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.719 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 56282250).
+19:18:50.719 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.721 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 57182250).
+19:18:50.721 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.723 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 58082250).
+19:18:50.723 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.724 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 58892250).
+19:18:50.724 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.726 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 59702250).
+19:18:50.726 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.727 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 60602250).
+19:18:50.728 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.732 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 62312250).
+19:18:50.732 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.734 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 63122250).
+19:18:50.734 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.736 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 64022250).
+19:18:50.736 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.737 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 64832250).
+19:18:50.738 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.740 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 65732250).
+19:18:50.740 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.741 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 66261000).
+19:18:50.741 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.743 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 67161000).
+19:18:50.743 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.749 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 69861000).
+19:18:50.750 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.751 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 70502250).
+19:18:50.751 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.753 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 71402250).
+19:18:50.753 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.754 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 72122250).
+19:18:50.755 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.757 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 73022250).
+19:18:50.757 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.759 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 73832250).
+19:18:50.759 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.764 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 76352250).
+19:18:50.764 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.767 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 77068500).
+19:18:50.767 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.769 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 77968500).
+19:18:50.769 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.771 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 78868500).
+19:18:50.771 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.773 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 79768500).
+19:18:50.773 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.774 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 80668500).
+19:18:50.775 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.777 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 81568500).
+19:18:50.777 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.778 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 82262250).
+19:18:50.779 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.781 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 83162250).
+19:18:50.781 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.782 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 84062250).
+19:18:50.783 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.785 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 84962250).
+19:18:50.785 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.787 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 85862250).
+19:18:50.787 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.789 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 86702250).
+19:18:50.789 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.790 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 87602250).
+19:18:50.791 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.792 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 88502250).
+19:18:50.793 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.794 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 89402250).
+19:18:50.794 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.796 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 90302250).
+19:18:50.797 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.799 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 91202250).
+19:18:50.799 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.801 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 92102250).
+19:18:50.801 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.803 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 92912250).
+19:18:50.803 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.805 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 93812250).
+19:18:50.805 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.807 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 94622250).
+19:18:50.807 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.809 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 95522250).
+19:18:50.809 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.811 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 96422250).
+19:18:50.811 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.813 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 97322250).
+19:18:50.813 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.815 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 98222250).
+19:18:50.815 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.816 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 98664750).
+19:18:50.817 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.818 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 99564750).
+19:18:50.818 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.820 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 100464750).
+19:18:50.821 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.822 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 101364750).
+19:18:50.822 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.824 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 102264750).
+19:18:50.824 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.826 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 103082250).
+19:18:50.827 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.829 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 103982250).
+19:18:50.829 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.831 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 104882250).
+19:18:50.831 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.833 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 105782250).
+19:18:50.833 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.835 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 106682250).
+19:18:50.836 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.837 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 107582250).
+19:18:50.837 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.840 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 108482250).
+19:18:50.840 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.842 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 109382250).
+19:18:50.842 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.845 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 110282250).
+19:18:50.845 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.846 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 111182250).
+19:18:50.847 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.849 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 112082250).
+19:18:50.849 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.851 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 112982250).
+19:18:50.851 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.853 WARN : [mpegts @ 0000014b212e5380] Packet corrupt (stream = 0, dts = 113882250).
+19:18:50.853 WARN : [in#0/mpegts @ 0000014b212e4f40] corrupt input packet in stream 0
+19:18:50.880 INFO : Done

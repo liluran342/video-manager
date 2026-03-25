@@ -1,3 +1,4 @@
+//js/library.js (媒体库模块)
 import { formatTime, formatDate } from './utils.js';
 import { playVideo } from './player.js';
 

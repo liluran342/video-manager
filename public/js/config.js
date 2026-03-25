@@ -1,3 +1,4 @@
+//js/config.js (配置模块)
 export function loadConfig() {
     fetch('/api/config')
         .then(res => res.json())

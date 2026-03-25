@@ -1,0 +1,12 @@
+git add .
+git commit -m "✨ z主页js模块化"
+
+✅ git add . 会忽略 .gitignore 中的文件。
+
+3️⃣ 推送到 GitHub
+# 如果远程 origin 已经设置为 SSH
+git push origin main
+
+# 如果还没有设置远程仓库
+git remote add origin git@github.com:liluran342/video-manager.git
+git push -u origin main
