@@ -20,6 +20,39 @@
         .btn-primary:hover { background: #45a049; }
         .btn-scan { background: #2196F3; margin-top: 15px; }
         .btn-scan:hover { background: #1976D2; }
+        /* Active Downloads Queue */
+        .download-item {
+            background: #333;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .dl-title {
+            font-size: 12px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dl-progress-bg {
+            background: #111;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        .dl-progress-fill {
+            background: #2196F3;
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s linear;
+        }
+        .dl-percentage {
+            font-size: 10px;
+            color: #ccc;
+            text-align: right;
+            margin-top: 3px;
+        }
         /* Added Date Text */
         .added-date {
             text-align: center;
@@ -124,6 +157,11 @@
             <div class="form-group"><label>Cover Storage</label><input id="coverDir"></div>
             <div class="form-group"><label>DB Storage</label><input id="dbPath"></div>
             <button class="btn-primary" onclick="saveConfig()">Save Settings</button>
+        </div>
+        <!-- Active Downloads Panel -->
+        <div class="panel" id="queuePanel" style="display: none;">
+            <h3>🔄 Active Downloads</h3>
+            <div id="downloadQueue"></div>
         </div>
     </div>
     <div class="main">
@@ -305,26 +343,59 @@ function saveConfig() {
 // Tracker for notified downloads
 let alertedDownloads = new Set();
 
-// Poll download status every 3 seconds
+// Poll download status every 1 second (Faster polling for smooth progress bars)
 setInterval(() => {
     fetch('/api/downloads/status')
     .then(res => res.json())
     .then(statusMap => {
+        const queueContainer = document.getElementById('downloadQueue');
+        const queuePanel = document.getElementById('queuePanel');
+        
+        let activeHTML = '';
+        let hasActiveTasks = false;
+
         for (const url in statusMap) {
             const task = statusMap[url];
             
+            // Build the UI for currently downloading tasks
+            if (task.status === 'downloading') {
+                hasActiveTasks = true;
+                const progress = task.progress || 0;
+                activeHTML += `
+                    <div class="download-item">
+                        <div class="dl-title" title="${task.name}">${task.name}</div>
+                        <div class="dl-progress-bg">
+                            <div class="dl-progress-fill" style="width: ${progress}%;"></div>
+                        </div>
+                        <div class="dl-percentage">${progress.toFixed(1)}%</div>
+                    </div>
+                `;
+            }
+            
+            // Handle completed tasks
             if (task.status === 'completed' && !alertedDownloads.has(url)) {
                 alert(`✅ Download Finished: ${task.name}`);
                 alertedDownloads.add(url);
                 scanLibrary(); // Auto-scan library to show the new video immediately!
-            } else if (task.status === 'failed' && !alertedDownloads.has(url)) {
+            } 
+            // Handle failed tasks
+            else if (task.status === 'failed' && !alertedDownloads.has(url)) {
                 alert(`❌ Download Failed: ${task.name}. Please check the console.`);
                 alertedDownloads.add(url);
             }
         }
+
+        // Only show the Active Downloads panel if there is something downloading
+        if (hasActiveTasks) {
+            queuePanel.style.display = 'block';
+            queueContainer.innerHTML = activeHTML;
+        } else {
+            queuePanel.style.display = 'none';
+            queueContainer.innerHTML = '';
+        }
     })
     .catch(err => console.error('Status check failed:', err));
-}, 3000);
+}, 1000); // Changed to 1000ms (1 second) to make the progress bar update smoothly
 
 function startDownload() {
     const name = document.getElementById('dlName').value;

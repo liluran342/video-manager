@@ -171,36 +171,6 @@ app.post('/api/scan', (req, res) => {
     });
 });
 // API: Delete Video
-app.delete('/api/videos/:id', (req, res) => {
-    const id = req.params.id;
-    const cfg = loadConfig();
-    
-    // Fetch video info to get file paths
-    const video = db.prepare('SELECT filepath, cover FROM videos WHERE id = ?').get(id);
-    if (!video) return res.status(404).json({ success: false, error: 'Video not found' });
-
-    // 1. Delete physical video file
-    if (fs.existsSync(video.filepath)) {
-        try { fs.unlinkSync(video.filepath); } 
-        catch (e) { console.error('Failed to delete video file:', e); }
-    }
-
-    // 2. Delete physical cover image
-    if (video.cover) {
-        const coverPath = path.join(cfg.coverDir, video.cover);
-        if (fs.existsSync(coverPath)) {
-            try { fs.unlinkSync(coverPath); } 
-            catch (e) { console.error('Failed to delete cover file:', e); }
-        }
-    }
-
-    // 3. Delete from database
-    db.prepare('DELETE FROM videos WHERE id = ?').run(id);
-
-    console.log(`Deleted video: ${video.filepath}`);
-    res.json({ success: true, message: 'Video deleted' });
-});
-
 // API: Download
 app.post('/api/download', express.json(), (req, res) => {
     const { name, url } = req.body;
@@ -221,32 +191,45 @@ app.post('/api/download', express.json(), (req, res) => {
     const saveDir = path.resolve(cfg.videoDir); 
     ensureDir(saveDir);
 
-    // Mark as downloading
-    downloadStatus[url] = { name, status: 'downloading' };
+    // Mark as downloading with initial progress 0
+    downloadStatus[url] = { name, status: 'downloading', progress: 0 };
 
-     const downloader = spawn('N_m3u8DL-RE.exe',[
+    const downloader = spawn('N_m3u8DL-RE.exe',[
         url, 
         '--save-dir', saveDir, 
         '--save-name', name,
-        '--auto-select',       // Automatically selects the best video/audio streams
-        '--del-after-done',    // Deletes temporary .ts chunks after merging
+        '--auto-select',       
+        '--del-after-done',    
         '-H', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     ]);
-downloader.stdout.on('data', data => {
-    const text = iconv.decode(data, 'gbk');
-    console.log('[m3u8DL]', text.trim());
-});
 
-downloader.stderr.on('data', data => {
-    const text = iconv.decode(data, 'gbk');
-    console.error('[m3u8DL ERROR]', text.trim());
-});
+    // Parse progress from stdout
+    downloader.stdout.on('data', data => {
+        const text = iconv.decode(data, 'gbk');
+        
+        // Regex to find percentages like "45.2%" or "100%"
+        const match = text.match(/([\d\.]+)%/);
+        if (match) {
+            downloadStatus[url].progress = parseFloat(match[1]);
+        }
+    });
+
+    // Parse progress from stderr (sometimes N_m3u8DL-RE outputs progress here)
+    downloader.stderr.on('data', data => {
+        const text = iconv.decode(data, 'gbk');
+        
+        const match = text.match(/([\d\.]+)%/);
+        if (match) {
+            downloadStatus[url].progress = parseFloat(match[1]);
+        }
+    });
     
     // 3. Handle completion and save to database
     downloader.on('close', code => {
         console.log(`Download "${name}" finished with code ${code}.`);
         if (code === 0) {
             downloadStatus[url].status = 'completed';
+            downloadStatus[url].progress = 100;
             try {
                 // Save to download history
                 db.prepare('INSERT INTO download_history (url, name, added_at) VALUES (?, ?, ?)').run(url, name, Date.now());
