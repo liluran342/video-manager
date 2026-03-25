@@ -1,0 +1,8 @@
+﻿LOG 2026/03/25
+Save Path: C:\Users\Administrator\video-manager\Logs
+Task Start: 2026/03/25 15:56:03
+Task CommandLine: N_m3u8DL-RE.exe " https://surrit.com/41f5ff24-ce08-4dd8-83f5-116501426294/720p/video.m3u8" --save-dir E:\整理 --save-name FC2-PPV-4865786
+
+15:56:03.569 INFO : N_m3u8DL-RE (Beta version) 20251029
+15:56:03.570 EXTRA: ffmpeg => E:\下载\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\bin\ffmpeg.exe
+15:56:03.570 INFO : 加载URL:  https://surrit.com/41f5ff24-ce08-4dd8-83f5-116501426294/720p/video.m3u8

@@ -1,0 +1,24 @@
+﻿LOG 2026/03/25
+Save Path: C:\Users\Administrator\video-manager\Logs
+Task Start: 2026/03/25 16:06:33
+Task CommandLine: N_m3u8DL-RE.exe https://surrit.com/41f5ff24-ce08-4dd8-83f5-116501426294/720p/video.m3u8 --save-dir E:\整理 --save-name FC2-PPV-4865786 --auto-select --del-after-done -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+16:06:33.324 INFO : N_m3u8DL-RE (Beta version) 20251029
+16:06:33.324 EXTRA: ffmpeg => E:\下载\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\bin\ffmpeg.exe
+16:06:33.325 EXTRA: User-Defined Header => user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+16:06:33.325 INFO : 加载URL: https://surrit.com/41f5ff24-ce08-4dd8-83f5-116501426294/720p/video.m3u8
+16:06:34.770 INFO : 内容匹配: HTTP Live Streaming
+16:06:34.771 INFO : 正在解析媒体信息...
+16:06:34.780 WARN : 写出meta json
+16:06:34.787 INFO : 已解析, 共计 1 条媒体流, 基本流 1 条, 可选音频流 0 条, 可选字幕流 0 条
+16:06:34.787 INFO : Vid Kbps | 620 Segments | ~41m16s
+16:06:34.788 INFO : 已选择的流:
+16:06:34.788 INFO : Vid Kbps | 620 Segments | ~41m16s
+16:06:34.788 WARN : 写出meta json
+16:06:34.789 INFO : 保存文件名: FC2-PPV-4865786
+16:06:34.790 INFO : 开始下载...Vid Kbps
+16:06:36.515 WARN : 读取媒体信息...
+16:06:36.554 INFO : [0x100]: Video, h264 (High) ([27][0][0][0]), 1280x720, 24 fps
+16:06:36.555 INFO : [0x101]: Audio, aac (LC) ([15][0][0][0]), 237 kb/s
+16:09:14.256 INFO : 调用ffmpeg合并中...
+16:09:15.285 INFO : Done

@@ -5,9 +5,10 @@ const { spawn } = require('child_process');
 const crypto = require('crypto');
 const Database = require('better-sqlite3');
 const ffmpeg = require('fluent-ffmpeg');
-
+const iconv = require('iconv-lite');
 const CONFIG_PATH = './config.json';
-
+// NEW: Store active downloads status in memory
+const downloadStatus = {};
 // Read config
 function loadConfig() {
     if (!fs.existsSync(CONFIG_PATH)) {
@@ -42,13 +43,22 @@ db.exec(`
         cover TEXT,
         filepath TEXT UNIQUE,
         resolution TEXT,
-        progress REAL DEFAULT 0
+        progress REAL DEFAULT 0,
+        added_at INTEGER DEFAULT 0
     )
 `);
-
+// NEW: Create download history table to prevent duplicates
+db.exec(`
+    CREATE TABLE IF NOT EXISTS download_history (
+        url TEXT PRIMARY KEY,
+        name TEXT,
+        added_at INTEGER
+    )
+`);
 // Add new columns if upgrading from the previous version
 try { db.exec("ALTER TABLE videos ADD COLUMN resolution TEXT DEFAULT 'Unknown'"); } catch (e) {}
 try { db.exec("ALTER TABLE videos ADD COLUMN progress REAL DEFAULT 0"); } catch (e) {}
+try { db.exec("ALTER TABLE videos ADD COLUMN added_at INTEGER DEFAULT 0"); } catch (e) {}
 
 app.use(express.static('public'));
 app.use('/covers', express.static(config.coverDir));
@@ -84,8 +94,13 @@ function extractVideoInfo(filePath, coverDir) {
         });
     });
 }
+// NEW API: Check download status
+app.get('/api/downloads/status', (req, res) => {
+    res.json(downloadStatus);
+});
 
-// API: Config
+
+// API: Configf
 app.get('/api/config', (req, res) => res.json(loadConfig()));
 app.post('/api/config', express.json(), (req, res) => {
     saveConfig(req.body);
@@ -93,11 +108,12 @@ app.post('/api/config', express.json(), (req, res) => {
 });
 
 // API: Get Videos
+// API: Get Videos
 app.get('/api/videos', (req, res) => {
-    const videos = db.prepare('SELECT id, name, format, duration, cover, resolution, progress FROM videos ORDER BY name ASC').all();
+    // Added 'added_at' to the SELECT statement
+    const videos = db.prepare('SELECT id, name, format, duration, cover, resolution, progress, added_at FROM videos ORDER BY name ASC').all();
     res.json(videos);
 });
-
 // API: Play Video
 app.get('/api/play/:id', (req, res) => {
     const video = db.prepare('SELECT filepath FROM videos WHERE id = ?').get(req.params.id);
@@ -127,7 +143,7 @@ app.post('/api/scan', (req, res) => {
         const videos = files.filter(f => f.endsWith('.mp4') || f.endsWith('.mkv'));
         res.json({ success: true, message: `Scanning ${videos.length} videos... Check console.` });
 
-        const insertStmt = db.prepare('INSERT INTO videos (id, name, format, duration, cover, filepath, resolution) VALUES (?, ?, ?, ?, ?, ?, ?)');
+         const insertStmt = db.prepare('INSERT INTO videos (id, name, format, duration, cover, filepath, resolution, added_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
         const checkStmt = db.prepare('SELECT id FROM videos WHERE filepath = ?');
 
         for (const file of videos) {
@@ -138,11 +154,15 @@ app.post('/api/scan', (req, res) => {
             const ext = path.extname(file);
             const name = path.basename(file, ext);
             const id = crypto.randomUUID();
+              // Get the physical file creation time on the hard drive
+            const stat = fs.statSync(filePath);
+            const addedAt = stat.birthtimeMs || stat.mtimeMs || Date.now();
 
-            try {
+               try {
                 const info = await extractVideoInfo(filePath, cfg.coverDir);
-                insertStmt.run(id, name, ext.replace('.', ''), info.duration, info.coverName, filePath, info.resolution);
-                console.log(`Added: ${name} [${info.resolution}]`);
+                // Pass 'addedAt' as the final parameter
+                insertStmt.run(id, name, ext.replace('.', ''), info.duration, info.coverName, filePath, info.resolution, addedAt);
+                console.log(`Added: ${name}[${info.resolution}]`);
             } catch (err) {
                 console.error(`Error processing ${file}:`, err);
             }
@@ -186,18 +206,58 @@ app.post('/api/download', express.json(), (req, res) => {
     const { name, url } = req.body;
     if (!name || !url) return res.status(400).json({ success: false });
 
+    // 1. Check if already downloaded in the database
+    const existing = db.prepare('SELECT name FROM download_history WHERE url = ?').get(url);
+    if (existing) {
+        return res.json({ success: false, error: 'This m3u8 URL has already been downloaded previously!' });
+    }
+
+    // 2. Check if currently downloading right now
+    if (downloadStatus[url] && downloadStatus[url].status === 'downloading') {
+        return res.json({ success: false, error: 'This video is currently being downloaded!' });
+    }
+
     const cfg = loadConfig();
     const saveDir = path.resolve(cfg.videoDir); 
     ensureDir(saveDir);
 
-    const downloader = spawn('N_m3u8DL-RE.exe',[url, '--save-dir', saveDir, '--save-name', name]);
+    // Mark as downloading
+    downloadStatus[url] = { name, status: 'downloading' };
 
-    downloader.stdout.on('data', data => console.log(`[m3u8DL] ${data.toString().trim()}`));
-    downloader.on('close', code => console.log(`Download "${name}" finished.`));
-
-    res.json({ success: true, message: 'Download started.' });
+     const downloader = spawn('N_m3u8DL-RE.exe',[
+        url, 
+        '--save-dir', saveDir, 
+        '--save-name', name,
+        '--auto-select',       // Automatically selects the best video/audio streams
+        '--del-after-done',    // Deletes temporary .ts chunks after merging
+        '-H', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    ]);
+downloader.stdout.on('data', data => {
+    const text = iconv.decode(data, 'gbk');
+    console.log('[m3u8DL]', text.trim());
 });
 
+downloader.stderr.on('data', data => {
+    const text = iconv.decode(data, 'gbk');
+    console.error('[m3u8DL ERROR]', text.trim());
+});
+    
+    // 3. Handle completion and save to database
+    downloader.on('close', code => {
+        console.log(`Download "${name}" finished with code ${code}.`);
+        if (code === 0) {
+            downloadStatus[url].status = 'completed';
+            try {
+                // Save to download history
+                db.prepare('INSERT INTO download_history (url, name, added_at) VALUES (?, ?, ?)').run(url, name, Date.now());
+            } catch (e) { console.error('DB Insert Error:', e); }
+        } else {
+            downloadStatus[url].status = 'failed';
+        }
+    });
+
+    res.json({ success: true, message: 'Download started in background.' });
+});
 app.listen(PORT, () => {
     console.log(`Server running at: http://localhost:${PORT}`);
 });

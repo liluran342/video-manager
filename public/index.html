@@ -20,6 +20,14 @@
         .btn-primary:hover { background: #45a049; }
         .btn-scan { background: #2196F3; margin-top: 15px; }
         .btn-scan:hover { background: #1976D2; }
+        /* Added Date Text */
+        .added-date {
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            margin-top: 6px;
+            padding-bottom: 5px;
+        }
         /* Delete Button */
         .delete-btn {
             position: absolute;
@@ -71,10 +79,23 @@
         .res { color: #2196F3; }
         .duration { color: #fff; align-self: flex-end; }
         
-        .progress-bar { height: 4px; background: #555; width: 100%; position: absolute; bottom: 35px; left: 0; }
+       .progress-bar { 
+            height: 4px; 
+            background: #555; 
+            width: 100%; 
+        }
         .progress-fill { height: 100%; background: #e50914; width: 0%; }
 
-        .title { text-align: center; margin-top: 12px; padding: 0 10px; font-size: 14px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+         .title { 
+            text-align: center; 
+            margin-top: 8px; 
+            padding: 0 10px; 
+            font-size: 14px; 
+            color: #ddd; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
 
         /* Video Player Modal */
         .player-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
@@ -149,7 +170,7 @@ function loadVideos() {
             // Calculate progress percentage for red bar
             const percent = v.duration > 0 ? Math.min((v.progress / v.duration) * 100, 100) : 0;
 
-          card.innerHTML = `
+         card.innerHTML = `
                 <button class="delete-btn" onclick="deleteVideo('${v.id}', event)" title="Delete Video">🗑️</button>
                 <div class="thumb" style="background-image: ${bgImage}">
                     <div class="badges-top">
@@ -160,6 +181,7 @@ function loadVideos() {
                 </div>
                 <div class="progress-bar"><div class="progress-fill" style="width: ${percent}%;"></div></div>
                 <div class="title" title="${v.name}">${v.name}</div>
+                <div class="added-date">Added: ${formatDate(v.added_at)}</div>
             `;
 
             // Updated click logic to ignore clicks on the delete button
@@ -173,7 +195,15 @@ function loadVideos() {
         });
     });
 }
-
+// Format timestamp to YYYY-MM-DD
+function formatDate(timestamp) {
+    if (!timestamp) return 'Unknown Date';
+    const d = new Date(timestamp);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
 function playVideo(id, name, progress) {
     currentVideoId = id;
     const player = document.getElementById('player');
@@ -272,6 +302,29 @@ function saveConfig() {
         })
     }).then(() => alert('Settings saved!'));
 }
+// Tracker for notified downloads
+let alertedDownloads = new Set();
+
+// Poll download status every 3 seconds
+setInterval(() => {
+    fetch('/api/downloads/status')
+    .then(res => res.json())
+    .then(statusMap => {
+        for (const url in statusMap) {
+            const task = statusMap[url];
+            
+            if (task.status === 'completed' && !alertedDownloads.has(url)) {
+                alert(`✅ Download Finished: ${task.name}`);
+                alertedDownloads.add(url);
+                scanLibrary(); // Auto-scan library to show the new video immediately!
+            } else if (task.status === 'failed' && !alertedDownloads.has(url)) {
+                alert(`❌ Download Failed: ${task.name}. Please check the console.`);
+                alertedDownloads.add(url);
+            }
+        }
+    })
+    .catch(err => console.error('Status check failed:', err));
+}, 3000);
 
 function startDownload() {
     const name = document.getElementById('dlName').value;
