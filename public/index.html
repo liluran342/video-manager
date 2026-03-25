@@ -20,6 +20,28 @@
         .btn-primary:hover { background: #45a049; }
         .btn-scan { background: #2196F3; margin-top: 15px; }
         .btn-scan:hover { background: #1976D2; }
+        /* Delete Button */
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(229, 9, 20, 0.8);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.2s, background 0.2s;
+            z-index: 2;
+        }
+        .card:hover .delete-btn {
+            opacity: 1;
+        }
+        .delete-btn:hover {
+            background: rgba(229, 9, 20, 1);
+        }
 
         /* Main Area */
         .main { flex: 1; overflow-y: auto; padding: 30px; background: #0f0f0f; }
@@ -28,7 +50,7 @@
 
         /* Video Cards */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
-        .card { cursor: pointer; transition: 0.2s; background: #222; border-radius: 8px; padding-bottom: 10px; overflow: hidden; }
+        .card { cursor: pointer; transition: 0.2s; background: #222; border-radius: 8px; padding-bottom: 10px; overflow: hidden; position: relative; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.5); background: #2a2a2a; }
 
         .thumb {
@@ -37,15 +59,21 @@
             background-size: cover;
             background-position: center;
             display: flex;
-            align-items: flex-end;
+            flex-direction: column;
             justify-content: space-between;
             padding: 8px;
-            position: relative;
         }
 
+        .badges-top { display: flex; gap: 5px; }
         .badge { background: rgba(0,0,0,0.8); padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .duration { color: #fff; }
+        
         .format { color: #4CAF50; }
+        .res { color: #2196F3; }
+        .duration { color: #fff; align-self: flex-end; }
+        
+        .progress-bar { height: 4px; background: #555; width: 100%; position: absolute; bottom: 35px; left: 0; }
+        .progress-fill { height: 100%; background: #e50914; width: 0%; }
+
         .title { text-align: center; margin-top: 12px; padding: 0 10px; font-size: 14px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* Video Player Modal */
@@ -61,42 +89,22 @@
 <body>
 
 <div class="app">
-    <!-- Sidebar -->
     <div class="sidebar">
         <h2>🎬 Video Manager</h2>
-
         <div class="panel">
             <h3>📥 Download</h3>
-            <div class="form-group">
-                <label>Video Name</label>
-                <input id="dlName" placeholder="e.g. Episode_01">
-            </div>
-            <div class="form-group">
-                <label>m3u8 URL</label>
-                <input id="dlUrl" placeholder="https://...">
-            </div>
+            <div class="form-group"><label>Video Name</label><input id="dlName"></div>
+            <div class="form-group"><label>m3u8 URL</label><input id="dlUrl"></div>
             <button class="btn-primary" onclick="startDownload()">Download Video</button>
         </div>
-
         <div class="panel">
             <h3>⚙️ Settings</h3>
-            <div class="form-group">
-                <label>Video Storage Location</label>
-                <input id="videoDir">
-            </div>
-            <div class="form-group">
-                <label>Cover Storage Location</label>
-                <input id="coverDir">
-            </div>
-            <div class="form-group">
-                <label>Database Storage Location</label>
-                <input id="dbPath">
-            </div>
+            <div class="form-group"><label>Video Storage</label><input id="videoDir"></div>
+            <div class="form-group"><label>Cover Storage</label><input id="coverDir"></div>
+            <div class="form-group"><label>DB Storage</label><input id="dbPath"></div>
             <button class="btn-primary" onclick="saveConfig()">Save Settings</button>
         </div>
     </div>
-
-    <!-- Main Content -->
     <div class="main">
         <div class="header">
             <h1>My Library</h1>
@@ -106,7 +114,6 @@
     </div>
 </div>
 
-<!-- Video Player Modal -->
 <div id="playerModal" class="player-modal">
     <div class="player-content">
         <div class="player-header">
@@ -118,86 +125,136 @@
 </div>
 
 <script>
-// Format seconds to MM:SS or HH:MM:SS
+let currentVideoId = null;
+let saveProgressInterval = null;
+
 function formatTime(seconds) {
     if (!seconds) return '00:00';
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = Math.floor(seconds % 60);
-    const paddedM = m.toString().padStart(2, '0');
-    const paddedS = s.toString().padStart(2, '0');
-    return h > 0 ? `${h}:${paddedM}:${paddedS}` : `${paddedM}:${paddedS}`;
+    return h > 0 ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}` : `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// Load Videos from DB
 function loadVideos() {
     const list = document.getElementById('list');
     list.innerHTML = '';
 
-    fetch('/api/videos')
-    .then(res => res.json())
-    .then(data => {
+    fetch('/api/videos').then(res => res.json()).then(data => {
         data.forEach(v => {
             const card = document.createElement('div');
             card.className = 'card';
-            
-            // Generate Cover URL or use a fallback dark background
             const bgImage = v.cover ? `url('/covers/${v.cover}')` : 'none';
+            
+            // Calculate progress percentage for red bar
+            const percent = v.duration > 0 ? Math.min((v.progress / v.duration) * 100, 100) : 0;
 
-            card.innerHTML = `
+          card.innerHTML = `
+                <button class="delete-btn" onclick="deleteVideo('${v.id}', event)" title="Delete Video">🗑️</button>
                 <div class="thumb" style="background-image: ${bgImage}">
-                    <span class="badge format">${v.format.toUpperCase()}</span>
+                    <div class="badges-top">
+                        <span class="badge format">${(v.format || '').toUpperCase()}</span>
+                        <span class="badge res">${v.resolution || 'Unknown'}</span>
+                    </div>
                     <span class="badge duration">${formatTime(v.duration)}</span>
                 </div>
+                <div class="progress-bar"><div class="progress-fill" style="width: ${percent}%;"></div></div>
                 <div class="title" title="${v.name}">${v.name}</div>
             `;
 
-            // Passing the ID instead of name/path
-            card.onclick = () => playVideo(v.id, v.name);
+            // Updated click logic to ignore clicks on the delete button
+            card.onclick = (e) => {
+                if (!e.target.closest('.delete-btn')) {
+                    playVideo(v.id, v.name, v.progress);
+                }
+            };
+            card.onclick = () => playVideo(v.id, v.name, v.progress);
             list.appendChild(card);
         });
     });
 }
 
-// Play Video via ID
-function playVideo(id, name) {
+function playVideo(id, name, progress) {
+    currentVideoId = id;
     const player = document.getElementById('player');
     const modal = document.getElementById('playerModal');
-    const title = document.getElementById('nowPlayingTitle');
-
-    player.src = '/api/play/' + id; // Backend will look up the filepath in the DB using this ID
-    title.innerText = name;
+    
+    document.getElementById('nowPlayingTitle').innerText = name;
+    player.src = '/api/play/' + id;
+    
+    // Jump to saved progress when video metadata is loaded
+    player.onloadedmetadata = () => {
+        if (progress > 0) player.currentTime = progress;
+    };
+    
     modal.style.display = 'flex';
     player.play();
+
+    // Auto-save progress every 5 seconds while playing
+    saveProgressInterval = setInterval(() => {
+        if (!player.paused && currentVideoId) {
+            saveProgress(currentVideoId, player.currentTime);
+        }
+    }, 5000);
 }
 
-// Close Video
+function saveProgress(id, time) {
+    fetch('/api/progress/' + id, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ progress: time })
+    });
+}
+// Delete Video
+function deleteVideo(id, event) {
+    event.stopPropagation(); // Prevents the video player from opening
+
+    if (!confirm('Are you sure you want to delete this video? The actual file will be permanently removed from your disk.')) {
+        return;
+    }
+
+    fetch('/api/videos/' + id, { method: 'DELETE' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            loadVideos(); // Refresh the grid
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(err => alert('Request failed: ' + err));
+}
 function closePlayer() {
     const player = document.getElementById('player');
+    
+    // Save final progress before closing
+    if (currentVideoId && player.currentTime > 0) {
+        saveProgress(currentVideoId, player.currentTime);
+    }
+    
+    clearInterval(saveProgressInterval);
+    currentVideoId = null;
+    
     document.getElementById('playerModal').style.display = 'none';
     player.pause();
     player.src = ''; 
+    
+    // Reload the list so the red progress bar updates visually
+    loadVideos();
 }
 
-// Close on background click
 document.getElementById('playerModal').addEventListener('click', function(e) {
     if (e.target === this) closePlayer();
 });
 
-// Scan Library
 function scanLibrary() {
     fetch('/api/scan', { method: 'POST' })
     .then(res => res.json())
-    .then(data => {
-        alert(data.message);
-        setTimeout(loadVideos, 3000); // Reload list after a short delay
-    });
+    .then(data => { alert(data.message); setTimeout(loadVideos, 3000); });
 }
 
-// Init Load
 loadVideos();
 
-// Settings & Config Logic
 fetch('/api/config').then(res => res.json()).then(cfg => {
     document.getElementById('videoDir').value = cfg.videoDir || '';
     document.getElementById('coverDir').value = cfg.coverDir || '';
@@ -220,24 +277,12 @@ function startDownload() {
     const name = document.getElementById('dlName').value;
     const url = document.getElementById('dlUrl').value;
     if (!name || !url) return alert('Provide Name and URL');
-
     fetch('/api/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, url })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            document.getElementById('dlName').value = '';
-            document.getElementById('dlUrl').value = '';
-        } else {
-            alert('Error: ' + data.error);
-        }
-    });
+    }).then(res => res.json()).then(data => { alert(data.message); });
 }
 </script>
-
 </body>
 </html>
