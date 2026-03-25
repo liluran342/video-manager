@@ -11,7 +11,9 @@ ensureDir(config.videoDir);
 ensureDir(config.coverDir);
 
 // 静态文件
-app.use(express.static('public'));
+app.use(express.static(
+  path.join(__dirname, '../frontend/public')
+));
 app.use('/covers', express.static(config.coverDir));
 app.use(express.json());
 
