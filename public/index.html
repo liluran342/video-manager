@@ -2,32 +2,86 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>视频管理</title>
+    <title>视频库</title>
+    <style>
+        body {
+            background: #111;
+            color: #fff;
+            font-family: Arial;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 200px);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .card {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .thumb {
+            width: 100%;
+            height: 120px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .title {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        video {
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>我的视频库</h1>
-    <div id="list"></div>
 
-    <video id="player" controls width="600"></video>
+<h1>🎬 我的影片库</h1>
 
-    <script>
-        fetch('/api/videos')
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById('list');
+<div class="grid" id="list"></div>
 
-                data.forEach(v => {
-                    const btn = document.createElement('button');
-                    btn.innerText = v;
+<video id="player" controls width="800"></video>
 
-                    btn.onclick = () => {
-                        document.getElementById('player').src = '/videos/' + v;
-                    };
+<script>
+fetch('/api/videos')
+.then(res => res.json())
+.then(data => {
+    const list = document.getElementById('list');
 
-                    list.appendChild(btn);
-                    list.appendChild(document.createElement('br'));
-                });
-            });
-    </script>
+    data.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        card.innerHTML = `
+            <div class="thumb">▶</div>
+            <div class="title">${v}</div>
+        `;
+
+        card.onclick = () => {
+            document.getElementById('player').src = '/videos/' + v;
+        };
+
+        list.appendChild(card);
+    });
+});
+</script>
+
 </body>
 </html>
