@@ -172,6 +172,25 @@ app.post('/api/scan', (req, res) => {
 });
 // API: Delete Video
 // API: Download
+  function parseProgress(data, url) {
+        // N_m3u8DL-RE 默认是 UTF-8 输出，纯数字进度无需使用 gbk
+        const text = data.toString('utf-8'); 
+        
+        // 获取该数据块中包含的【所有】百分比匹配项
+        const matches = [...text.matchAll(/([\d\.]+)%/g)];
+        
+        if (matches.length > 0) {
+            // 获取最后一个匹配项（最新的进度）
+            const latestMatch = matches[matches.length - 1][1];
+            const percent = parseFloat(latestMatch);
+            
+            // 防跳跃机制：只有当新进度大于当前进度，且不大于 100 时才更新
+            // 这样可以避免多线程下载时进度条在 20% 和 80% 之间来回闪烁
+            if (!isNaN(percent) && percent > downloadStatus[url].progress && percent <= 100) {
+                downloadStatus[url].progress = percent;
+            }
+        }
+    }
 app.post('/api/download', express.json(), (req, res) => {
     const { name, url } = req.body;
     if (!name || !url) return res.status(400).json({ success: false });
@@ -204,25 +223,9 @@ app.post('/api/download', express.json(), (req, res) => {
     ]);
 
     // Parse progress from stdout
-    downloader.stdout.on('data', data => {
-        const text = iconv.decode(data, 'gbk');
-        
-        // Regex to find percentages like "45.2%" or "100%"
-        const match = text.match(/([\d\.]+)%/);
-        if (match) {
-            downloadStatus[url].progress = parseFloat(match[1]);
-        }
-    });
-
-    // Parse progress from stderr (sometimes N_m3u8DL-RE outputs progress here)
-    downloader.stderr.on('data', data => {
-        const text = iconv.decode(data, 'gbk');
-        
-        const match = text.match(/([\d\.]+)%/);
-        if (match) {
-            downloadStatus[url].progress = parseFloat(match[1]);
-        }
-    });
+    // 将原本的 stdout 和 stderr 监听替换为：
+    downloader.stdout.on('data', data => parseProgress(data, url));
+    downloader.stderr.on('data', data => parseProgress(data, url));
     
     // 3. Handle completion and save to database
     downloader.on('close', code => {
