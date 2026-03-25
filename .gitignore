@@ -1,2 +1,13 @@
+# 忽略下载工具
+N_m3u8DL-RE.exe
+ffmpeg.exe
+
+# 忽略视频文件
+*.mp4
+*.ts
+
+# 忽略配置（可选）
+config.json
+
+# node
 node_modules/
-videos/
