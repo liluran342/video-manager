@@ -1,0 +1,5 @@
+{
+  "videoDir": "./videos",
+  "coverDir": "./covers",
+  "dbPath": "./video.db"
+}

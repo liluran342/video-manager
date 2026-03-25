@@ -54,6 +54,14 @@
 <body>
 
 <h1>🎬 我的影片库</h1>
+<h2>⚙️ 设置</h2>
+
+<div>
+    视频目录：<input id="videoDir"><br>
+    封面目录：<input id="coverDir"><br>
+    数据库路径：<input id="dbPath"><br>
+    <button onclick="saveConfig()">保存</button>
+</div>
 
 <div class="grid" id="list"></div>
 
@@ -81,6 +89,27 @@ fetch('/api/videos')
         list.appendChild(card);
     });
 });
+// 加载配置
+fetch('/api/config')
+.then(res => res.json())
+.then(cfg => {
+    videoDir.value = cfg.videoDir;
+    coverDir.value = cfg.coverDir;
+    dbPath.value = cfg.dbPath;
+});
+
+// 保存配置
+function saveConfig() {
+    fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            videoDir: videoDir.value,
+            coverDir: coverDir.value,
+            dbPath: dbPath.value
+        })
+    }).then(() => alert('保存成功'));
+}
 </script>
 
 </body>
