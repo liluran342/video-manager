@@ -22,7 +22,8 @@ const downloadRoutes = require('./routes/download');
 
 app.use('/api/config', configRoutes);
 app.use('/api/videos', videoRoutes);
-app.use('/api/download', downloadRoutes);
+app.use('/api/download', downloadRoutes);  // 处理 /api/download (POST)
+app.use('/api/downloads', downloadRoutes); // 处理 /api/downloads/status (GET)
 
 // 特殊路由（播放与进度在 video 路由里已处理，注意前缀）
 // 如果你希望保持原样 API，可以这样映射：

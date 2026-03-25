@@ -170,7 +170,7 @@ app.post('/api/scan', (req, res) => {
         console.log('✅ Scan completed.');
     });
 });
-// API: Delete Video
+
 // API: Download
   function parseProgress(data, url) {
         // N_m3u8DL-RE 默认是 UTF-8 输出，纯数字进度无需使用 gbk
