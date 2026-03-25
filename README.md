@@ -10,3 +10,22 @@
 - ⚡ 轻量简单，无数据库
 
 ## 📁 项目结构
+video-manager/
+├── public/ # 前端页面
+├── videos/ # 本地视频目录
+├── server.js # 后端服务
+├── README.md
+
+## ▶️ 如何运行
+
+```bash
+npm install
+node server.js
+📌 说明
+videos 目录不会上传到 GitHub（已忽略）
+适合本地视频管理
+🔧 后续计划
+ 视频封面（缩略图）
+ 标签系统
+ m3u8 支持
+ 搜索功能

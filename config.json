@@ -1,5 +1,5 @@
 {
-  "videoDir": "./videos",
+  "videoDir": "E:\\整理",
   "coverDir": "./covers",
   "dbPath": "./video.db"
 }

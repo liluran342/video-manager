@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>视频库</title>
+    <title>Video Library</title>
     <style>
         body {
             background: #111;
@@ -10,8 +10,17 @@
             font-family: Arial;
         }
 
-        h1 {
+        h1, h2 {
             text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
 
         .grid {
@@ -24,43 +33,87 @@
         .card {
             cursor: pointer;
             transition: 0.3s;
+            background: #222;
+            padding: 10px;
+            border-radius: 8px;
         }
 
         .card:hover {
             transform: scale(1.05);
+            background: #333;
         }
 
         .thumb {
             width: 100%;
             height: 120px;
-            background: #333;
+            background: #444;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 24px;
+            border-radius: 4px;
         }
 
         .title {
             text-align: center;
-            margin-top: 5px;
+            margin-top: 10px;
             font-size: 14px;
+            word-wrap: break-word;
         }
 
         video {
             display: block;
             margin: 20px auto;
+            max-width: 100%;
+        }
+
+        input {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 80%;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background: #45a049;
         }
     </style>
 </head>
 <body>
 
-<h1>🎬 我的影片库</h1>
-<h2>⚙️ 设置</h2>
+<h1>🎬 My Video Library</h1>
 
-<div>
-    视频目录：<input id="videoDir"><br>
-    封面目录：<input id="coverDir"><br>
-    数据库路径：<input id="dbPath"><br>
-    <button onclick="saveConfig()">保存</button>
+<div class="container">
+    <h2>📥 Download Video</h2>
+    <div>
+        Video Name:<br>
+        <input id="dlName" placeholder="e.g. Episode_01"><br>
+        m3u8 URL:<br>
+        <input id="dlUrl" placeholder="https://example.com/video.m3u8"><br>
+        <button onclick="startDownload()">Download via N_m3u8DL-RE</button>
+    </div>
+</div>
+
+<div class="container">
+    <h2>⚙️ Settings</h2>
+    <div>
+        Video Directory: <input id="videoDir"><br>
+        Cover Directory: <input id="coverDir"><br>
+        Database Path: <input id="dbPath"><br>
+        <button onclick="saveConfig()">Save Settings</button>
+    </div>
 </div>
 
 <div class="grid" id="list"></div>
@@ -68,47 +121,84 @@
 <video id="player" controls width="800"></video>
 
 <script>
-fetch('/api/videos')
-.then(res => res.json())
-.then(data => {
+// Load Videos
+function loadVideos() {
     const list = document.getElementById('list');
+    list.innerHTML = ''; // Clear current list
 
-    data.forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'card';
+    fetch('/api/videos')
+    .then(res => res.json())
+    .then(data => {
+        data.forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'card';
 
-        card.innerHTML = `
-            <div class="thumb">▶</div>
-            <div class="title">${v}</div>
-        `;
+            card.innerHTML = `
+                <div class="thumb">▶</div>
+                <div class="title">${v}</div>
+            `;
 
-        card.onclick = () => {
-            document.getElementById('player').src = '/videos/' + v;
-        };
+            card.onclick = () => {
+                document.getElementById('player').src = '/videos/' + encodeURIComponent(v);
+                document.getElementById('player').play();
+            };
 
-        list.appendChild(card);
+            list.appendChild(card);
+        });
     });
-});
-// 加载配置
+}
+
+// Initial Video Load
+loadVideos();
+
+// Load Config
 fetch('/api/config')
 .then(res => res.json())
 .then(cfg => {
-    videoDir.value = cfg.videoDir;
-    coverDir.value = cfg.coverDir;
-    dbPath.value = cfg.dbPath;
+    document.getElementById('videoDir').value = cfg.videoDir || '';
+    document.getElementById('coverDir').value = cfg.coverDir || '';
+    document.getElementById('dbPath').value = cfg.dbPath || '';
 });
 
-// 保存配置
+// Save Config
 function saveConfig() {
     fetch('/api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            videoDir: videoDir.value,
-            coverDir: coverDir.value,
-            dbPath: dbPath.value
+            videoDir: document.getElementById('videoDir').value,
+            coverDir: document.getElementById('coverDir').value,
+            dbPath: document.getElementById('dbPath').value
         })
-    }).then(() => alert('保存成功'));
+    }).then(() => alert('Settings saved successfully!'));
+}
+
+// Start Download
+function startDownload() {
+    const name = document.getElementById('dlName').value;
+    const url = document.getElementById('dlUrl').value;
+
+    if (!name || !url) {
+        alert('Please provide both the video name and the m3u8 URL.');
+        return;
+    }
+
+    fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, url })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('Download started! The video will be saved directly to your Video Directory ("E:\\整理"). Check terminal for progress.');
+            document.getElementById('dlName').value = '';
+            document.getElementById('dlUrl').value = '';
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(err => alert('Request failed: ' + err));
 }
 </script>
 
