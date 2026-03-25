@@ -29,3 +29,13 @@ videos 目录不会上传到 GitHub（已忽略）
  标签系统
  m3u8 支持
  搜索功能
+ ## 使用说明
+
+请手动下载以下工具并放入项目根目录：
+
+- N_m3u8DL-RE
+- ffmpeg
+
+下载地址：
+https://github.com/nilaoda/N_m3u8DL-RE
+https://ffmpeg.org/download.html

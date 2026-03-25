@@ -2,12 +2,16 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const crypto = require('crypto');
+const Database = require('better-sqlite3');
+const ffmpeg = require('fluent-ffmpeg');
+
 const CONFIG_PATH = './config.json';
 
 // Read config
 function loadConfig() {
     if (!fs.existsSync(CONFIG_PATH)) {
-        return { videoDir: './videos', coverDir: './covers', dbPath: './video.db' };
+        return { videoDir: 'E:\\整理', coverDir: './covers', dbPath: './video.db' };
     }
     return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
 }
@@ -26,80 +30,125 @@ function ensureDir(dir) {
 const app = express();
 const PORT = 3000;
 
-// Serve static files
+const config = loadConfig();
+ensureDir(config.videoDir);
+ensureDir(config.coverDir);
+
+// Initialize Database
+const db = new Database(config.dbPath);
+db.exec(`
+    CREATE TABLE IF NOT EXISTS videos (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        format TEXT,
+        duration REAL,
+        cover TEXT,
+        filepath TEXT UNIQUE
+    )
+`);
+
+// Serve static files (Frontend & Covers)
 app.use(express.static('public'));
+app.use('/covers', express.static(config.coverDir));
 
-app.use('/videos', (req, res, next) => {
-    const config = loadConfig();
-    ensureDir(config.videoDir);
-    ensureDir(config.coverDir);
-    express.static(config.videoDir)(req, res, next);
-});
+// Helper: Extract Video Info using FFmpeg
+function extractVideoInfo(filePath, coverDir) {
+    return new Promise((resolve, reject) => {
+        ffmpeg.ffprobe(filePath, (err, metadata) => {
+            if (err) return resolve({ duration: 0, coverName: null });
+            
+            const duration = metadata.format.duration;
+            const coverName = crypto.randomUUID() + '.jpg';
+            
+            ffmpeg(filePath)
+                .on('end', () => resolve({ duration, coverName }))
+                .on('error', () => resolve({ duration, coverName: null }))
+                .screenshots({
+                    timestamps:['20%'], // Take thumbnail at 20% of the video
+                    filename: coverName,
+                    folder: coverDir,
+                    size: '320x240'
+                });
+        });
+    });
+}
 
-// Get config
-app.get('/api/config', (req, res) => {
-    res.json(loadConfig());
-});
-
-// Update config
+// API: Get Config
+app.get('/api/config', (req, res) => res.json(loadConfig()));
 app.post('/api/config', express.json(), (req, res) => {
-    const newConfig = req.body;
-    saveConfig(newConfig);
+    saveConfig(req.body);
     res.json({ success: true });
 });
 
-// Get video list
+// API: Get Videos from Database
 app.get('/api/videos', (req, res) => {
-    const config = loadConfig();
-    const dir = path.resolve(config.videoDir);
-    
+    const videos = db.prepare('SELECT id, name, format, duration, cover FROM videos ORDER BY name ASC').all();
+    res.json(videos);
+});
+
+// API: Play Video by ID
+app.get('/api/play/:id', (req, res) => {
+    const video = db.prepare('SELECT filepath FROM videos WHERE id = ?').get(req.params.id);
+    if (video && fs.existsSync(video.filepath)) {
+        res.sendFile(video.filepath); // Express handles video streaming automatically
+    } else {
+        res.status(404).send('Video not found');
+    }
+});
+
+// API: Scan Directory and Add to Database
+app.post('/api/scan', (req, res) => {
+    const cfg = loadConfig();
+    const dir = path.resolve(cfg.videoDir);
     ensureDir(dir);
 
-    fs.readdir(dir, (err, files) => {
-        if (err) return res.status(500).send('Read failed');
+    fs.readdir(dir, async (err, files) => {
+        if (err) return res.status(500).json({ success: false, error: 'Failed to read directory' });
 
-        const videos = files.filter(f => f.endsWith('.mp4'));
-        res.json(videos);
+        const videos = files.filter(f => f.endsWith('.mp4') || f.endsWith('.mkv'));
+        res.json({ success: true, message: `Scanning ${videos.length} videos in the background... Check console.` });
+
+        const insertStmt = db.prepare('INSERT INTO videos (id, name, format, duration, cover, filepath) VALUES (?, ?, ?, ?, ?, ?)');
+        const checkStmt = db.prepare('SELECT id FROM videos WHERE filepath = ?');
+
+        for (const file of videos) {
+            const filePath = path.join(dir, file);
+            
+            // Skip if already in database
+            if (checkStmt.get(filePath)) continue;
+
+            console.log(`Scanning: ${file}...`);
+            const ext = path.extname(file);
+            const name = path.basename(file, ext);
+            const id = crypto.randomUUID();
+
+            try {
+                const info = await extractVideoInfo(filePath, cfg.coverDir);
+                insertStmt.run(id, name, ext.replace('.', ''), info.duration, info.coverName, filePath);
+                console.log(`Added to DB: ${name}`);
+            } catch (err) {
+                console.error(`Error processing ${file}:`, err);
+            }
+        }
+        console.log('✅ Background scan completed.');
     });
 });
 
-// Download video via N_m3u8DL-RE.exe
+// API: Download Video
 app.post('/api/download', express.json(), (req, res) => {
     const { name, url } = req.body;
-    
-    if (!name || !url) {
-        return res.status(400).json({ success: false, error: 'Name and URL are required' });
-    }
+    if (!name || !url) return res.status(400).json({ success: false });
 
-    const config = loadConfig();
-    // Use videoDir from config directly for downloads
-    const saveDir = path.resolve(config.videoDir); 
+    const cfg = loadConfig();
+    const saveDir = path.resolve(cfg.videoDir); 
     ensureDir(saveDir);
 
-    console.log(`Starting download: ${name} from ${url}`);
-    console.log(`Saving to directory: ${saveDir}`);
-    
-    // Spawn N_m3u8DL-RE.exe
-    const downloader = spawn('N_m3u8DL-RE.exe',[
-        url,
-        '--save-dir', saveDir,
-        '--save-name', name
-    ]);
+    const downloader = spawn('N_m3u8DL-RE.exe',[url, '--save-dir', saveDir, '--save-name', name]);
 
-    // Log the output to the server console
-    downloader.stdout.on('data', (data) => {
-        console.log(`[m3u8DL] ${data.toString().trim()}`);
-    });
+    downloader.stdout.on('data', data => console.log(`[m3u8DL] ${data.toString().trim()}`));
+    downloader.on('close', code => console.log(`Download "${name}" finished with code ${code}`));
 
-    downloader.stderr.on('data', (data) => {
-        console.error(`[m3u8DL Error] ${data.toString().trim()}`);
-    });
-
-    downloader.on('close', (code) => {
-        console.log(`Download process for "${name}" exited with code ${code}`);
-    });
-
-    res.json({ success: true, message: 'Download started in the background' });
+    res.json({ success: true, message: 'Download started in background.' });
 });
 
 app.listen(PORT, () => {

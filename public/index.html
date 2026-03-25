@@ -4,127 +4,135 @@
     <meta charset="UTF-8">
     <title>Video Library</title>
     <style>
-        body {
-            background: #111;
-            color: #fff;
-            font-family: Arial;
-        }
+        body { margin: 0; background: #111; color: #fff; font-family: Arial, sans-serif; }
+        .app { display: flex; height: 100vh; }
 
-        h1, h2 {
-            text-align: center;
-        }
+        /* Sidebar */
+        .sidebar { width: 280px; background: #1a1a1a; padding: 20px; border-right: 1px solid #333; overflow-y: auto; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 22px; }
+        .panel { margin-top: 20px; background: #222; padding: 15px; border-radius: 8px; }
+        .panel h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 8px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px; }
+        
+        .btn-primary { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-top: 5px; }
+        .btn-primary:hover { background: #45a049; }
+        .btn-scan { background: #2196F3; margin-top: 15px; }
+        .btn-scan:hover { background: #1976D2; }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #222;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
+        /* Main Area */
+        .main { flex: 1; overflow-y: auto; padding: 30px; background: #0f0f0f; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 28px; }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, 200px);
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .card {
-            cursor: pointer;
-            transition: 0.3s;
-            background: #222;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .card:hover {
-            transform: scale(1.05);
-            background: #333;
-        }
+        /* Video Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+        .card { cursor: pointer; transition: 0.2s; background: #222; border-radius: 8px; padding-bottom: 10px; overflow: hidden; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.5); background: #2a2a2a; }
 
         .thumb {
-            width: 100%;
-            height: 120px;
-            background: #444;
+            height: 140px;
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            border-radius: 4px;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 8px;
+            position: relative;
         }
 
-        .title {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 14px;
-            word-wrap: break-word;
-        }
+        .badge { background: rgba(0,0,0,0.8); padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .duration { color: #fff; }
+        .format { color: #4CAF50; }
+        .title { text-align: center; margin-top: 12px; padding: 0 10px; font-size: 14px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        video {
-            display: block;
-            margin: 20px auto;
-            max-width: 100%;
-        }
-
-        input {
-            margin-bottom: 10px;
-            padding: 5px;
-            width: 80%;
-            background: #333;
-            color: #fff;
-            border: 1px solid #555;
-            border-radius: 4px;
-        }
-
-        button {
-            padding: 8px 16px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        button:hover {
-            background: #45a049;
-        }
+        /* Video Player Modal */
+        .player-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .player-content { width: 80%; max-width: 1200px; background: #000; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); display: flex; flex-direction: column; }
+        .player-header { background: #1a1a1a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .player-title { font-size: 18px; font-weight: bold; color: #fff; }
+        .close-btn { color: #aaa; cursor: pointer; font-size: 24px; transition: 0.2s; }
+        .close-btn:hover { color: #ff4444; }
+        .player-content video { width: 100%; max-height: 80vh; outline: none; }
     </style>
 </head>
 <body>
 
-<h1>🎬 My Video Library</h1>
+<div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>🎬 Video Manager</h2>
 
-<div class="container">
-    <h2>📥 Download Video</h2>
-    <div>
-        Video Name:<br>
-        <input id="dlName" placeholder="e.g. Episode_01"><br>
-        m3u8 URL:<br>
-        <input id="dlUrl" placeholder="https://example.com/video.m3u8"><br>
-        <button onclick="startDownload()">Download via N_m3u8DL-RE</button>
+        <div class="panel">
+            <h3>📥 Download</h3>
+            <div class="form-group">
+                <label>Video Name</label>
+                <input id="dlName" placeholder="e.g. Episode_01">
+            </div>
+            <div class="form-group">
+                <label>m3u8 URL</label>
+                <input id="dlUrl" placeholder="https://...">
+            </div>
+            <button class="btn-primary" onclick="startDownload()">Download Video</button>
+        </div>
+
+        <div class="panel">
+            <h3>⚙️ Settings</h3>
+            <div class="form-group">
+                <label>Video Storage Location</label>
+                <input id="videoDir">
+            </div>
+            <div class="form-group">
+                <label>Cover Storage Location</label>
+                <input id="coverDir">
+            </div>
+            <div class="form-group">
+                <label>Database Storage Location</label>
+                <input id="dbPath">
+            </div>
+            <button class="btn-primary" onclick="saveConfig()">Save Settings</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+        <div class="header">
+            <h1>My Library</h1>
+            <button class="btn-primary btn-scan" style="width: auto; padding: 10px 20px;" onclick="scanLibrary()">🔄 Scan Library</button>
+        </div>
+        <div class="grid" id="list"></div>
     </div>
 </div>
 
-<div class="container">
-    <h2>⚙️ Settings</h2>
-    <div>
-        Video Directory: <input id="videoDir"><br>
-        Cover Directory: <input id="coverDir"><br>
-        Database Path: <input id="dbPath"><br>
-        <button onclick="saveConfig()">Save Settings</button>
+<!-- Video Player Modal -->
+<div id="playerModal" class="player-modal">
+    <div class="player-content">
+        <div class="player-header">
+            <span id="nowPlayingTitle" class="player-title">Loading...</span>
+            <span class="close-btn" onclick="closePlayer()">✖</span>
+        </div>
+        <video id="player" controls></video>
     </div>
 </div>
-
-<div class="grid" id="list"></div>
-
-<video id="player" controls width="800"></video>
 
 <script>
-// Load Videos
+// Format seconds to MM:SS or HH:MM:SS
+function formatTime(seconds) {
+    if (!seconds) return '00:00';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    const paddedM = m.toString().padStart(2, '0');
+    const paddedS = s.toString().padStart(2, '0');
+    return h > 0 ? `${h}:${paddedM}:${paddedS}` : `${paddedM}:${paddedS}`;
+}
+
+// Load Videos from DB
 function loadVideos() {
     const list = document.getElementById('list');
-    list.innerHTML = ''; // Clear current list
+    list.innerHTML = '';
 
     fetch('/api/videos')
     .then(res => res.json())
@@ -132,35 +140,70 @@ function loadVideos() {
         data.forEach(v => {
             const card = document.createElement('div');
             card.className = 'card';
+            
+            // Generate Cover URL or use a fallback dark background
+            const bgImage = v.cover ? `url('/covers/${v.cover}')` : 'none';
 
             card.innerHTML = `
-                <div class="thumb">▶</div>
-                <div class="title">${v}</div>
+                <div class="thumb" style="background-image: ${bgImage}">
+                    <span class="badge format">${v.format.toUpperCase()}</span>
+                    <span class="badge duration">${formatTime(v.duration)}</span>
+                </div>
+                <div class="title" title="${v.name}">${v.name}</div>
             `;
 
-            card.onclick = () => {
-                document.getElementById('player').src = '/videos/' + encodeURIComponent(v);
-                document.getElementById('player').play();
-            };
-
+            // Passing the ID instead of name/path
+            card.onclick = () => playVideo(v.id, v.name);
             list.appendChild(card);
         });
     });
 }
 
-// Initial Video Load
+// Play Video via ID
+function playVideo(id, name) {
+    const player = document.getElementById('player');
+    const modal = document.getElementById('playerModal');
+    const title = document.getElementById('nowPlayingTitle');
+
+    player.src = '/api/play/' + id; // Backend will look up the filepath in the DB using this ID
+    title.innerText = name;
+    modal.style.display = 'flex';
+    player.play();
+}
+
+// Close Video
+function closePlayer() {
+    const player = document.getElementById('player');
+    document.getElementById('playerModal').style.display = 'none';
+    player.pause();
+    player.src = ''; 
+}
+
+// Close on background click
+document.getElementById('playerModal').addEventListener('click', function(e) {
+    if (e.target === this) closePlayer();
+});
+
+// Scan Library
+function scanLibrary() {
+    fetch('/api/scan', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        setTimeout(loadVideos, 3000); // Reload list after a short delay
+    });
+}
+
+// Init Load
 loadVideos();
 
-// Load Config
-fetch('/api/config')
-.then(res => res.json())
-.then(cfg => {
+// Settings & Config Logic
+fetch('/api/config').then(res => res.json()).then(cfg => {
     document.getElementById('videoDir').value = cfg.videoDir || '';
     document.getElementById('coverDir').value = cfg.coverDir || '';
     document.getElementById('dbPath').value = cfg.dbPath || '';
 });
 
-// Save Config
 function saveConfig() {
     fetch('/api/config', {
         method: 'POST',
@@ -170,18 +213,13 @@ function saveConfig() {
             coverDir: document.getElementById('coverDir').value,
             dbPath: document.getElementById('dbPath').value
         })
-    }).then(() => alert('Settings saved successfully!'));
+    }).then(() => alert('Settings saved!'));
 }
 
-// Start Download
 function startDownload() {
     const name = document.getElementById('dlName').value;
     const url = document.getElementById('dlUrl').value;
-
-    if (!name || !url) {
-        alert('Please provide both the video name and the m3u8 URL.');
-        return;
-    }
+    if (!name || !url) return alert('Provide Name and URL');
 
     fetch('/api/download', {
         method: 'POST',
@@ -191,14 +229,13 @@ function startDownload() {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            alert('Download started! The video will be saved directly to your Video Directory ("E:\\整理"). Check terminal for progress.');
+            alert(data.message);
             document.getElementById('dlName').value = '';
             document.getElementById('dlUrl').value = '';
         } else {
             alert('Error: ' + data.error);
         }
-    })
-    .catch(err => alert('Request failed: ' + err));
+    });
 }
 </script>
 

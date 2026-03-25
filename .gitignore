@@ -11,3 +11,5 @@ config.json
 
 # node
 node_modules/
+covers/
+video.db
