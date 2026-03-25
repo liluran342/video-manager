@@ -1,0 +1,23 @@
+/* sidebar-widgets.css */
+.sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 22px; }
+
+/* 面板与表单 */
+.panel { margin-top: 20px; background: #222; padding: 15px; border-radius: 8px; }
+.panel h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 15px; }
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; }
+.form-group input { width: 100%; padding: 8px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px; }
+
+/* 按钮类 */
+.btn-primary { width: 100%; padding: 10px; background: #4CAF50; color: white; }
+.btn-primary:hover { background: #45a049; }
+.btn-scan { background: #2196F3; margin-top: 15px; }
+.btn-scan:hover { background: #1976D2; }
+
+/* 下载项目 */
+.download-item { background: #333; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+.dl-title { font-size: 12px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-progress-bg { background: #111; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
+.dl-progress-fill { background: #2196F3; height: 100%; width: 0%; transition: width 0.5s linear; }
+.dl-percentage { font-size: 10px; color: #ccc; text-align: right; margin-top: 3px; }

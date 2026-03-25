@@ -1,0 +1,52 @@
+/* video-grid.css */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+
+.card { 
+    cursor: pointer; 
+    transition: 0.2s; 
+    background: #222; 
+    border-radius: 8px; 
+    padding-bottom: 10px; 
+    overflow: hidden; 
+    position: relative; 
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.5); background: #2a2a2a; }
+
+.thumb {
+    height: 140px;
+    background-color: #333;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px;
+}
+
+/* 卡片内的小组件 */
+.badges-top { display: flex; gap: 5px; }
+.badge { background: rgba(0,0,0,0.8); padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+.format { color: #4CAF50; }
+.res { color: #2196F3; }
+.duration { color: #fff; align-self: flex-end; }
+
+.progress-bar { height: 4px; background: #555; width: 100%; }
+.progress-fill { height: 100%; background: #e50914; width: 0%; }
+
+.title { text-align: center; margin-top: 8px; padding: 0 10px; font-size: 14px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.added-date { text-align: center; font-size: 11px; color: #888; margin-top: 6px; padding-bottom: 5px; }
+
+/* 删除按钮 */
+.delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(229, 9, 20, 0.8);
+    color: white;
+    padding: 5px;
+    font-size: 14px;
+    opacity: 0;
+    z-index: 2;
+}
+.card:hover .delete-btn { opacity: 1; }
+.delete-btn:hover { background: rgba(229, 9, 20, 1); }

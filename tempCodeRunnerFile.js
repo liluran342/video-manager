@@ -1,0 +1,2 @@
+
+function printTree(dir, prefix = '') {

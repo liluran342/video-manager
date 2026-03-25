@@ -3,17 +3,43 @@ import { scanLibrary } from './library.js';
 
 let alertedDownloads = new Set();
 
+// js/downloader.js
+
 export function startDownload() {
-    const name = document.getElementById('dlName').value;
-    const url = document.getElementById('dlUrl').value;
+    const nameInput = document.getElementById('dlName'); // 获取 DOM 元素引用
+    const urlInput = document.getElementById('dlUrl');   // 获取 DOM 元素引用
+    
+    const name = nameInput.value;
+    const url = urlInput.value;
+
     if (!name || !url) return alert('Provide Name and URL');
     
     fetch('/api/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, url })
-    }).then(res => res.json()).then(data => { alert(data.message); });
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // 1. 弹出成功提示
+            alert(data.message || 'Download started!');
+            
+            // 2. 清空输入框文字
+            nameInput.value = '';
+            urlInput.value = '';
+        } else {
+            // 如果后端返回失败（例如 URL 重复），弹出错误原因，且不强制清空，方便用户修改
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(err => {
+        console.error('Download request failed:', err);
+        alert('Failed to connect to server.');
+    });
 }
+
+// ... 保持 initDownloader 不变
 
 export function initDownloader() {
     setInterval(() => {
