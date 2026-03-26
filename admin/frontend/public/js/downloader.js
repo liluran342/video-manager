@@ -1,16 +1,69 @@
 //js/downloader.js (下载模块)
 import { scanLibrary } from './library.js';
 
+// public/js/downloader.js
+
+let downloadPlan = []; // Local list of videos to download
 let alertedDownloads = new Set();
 
-// js/downloader.js
+export function addToPlan() {
+    const nameInput = document.getElementById('dlName');
+    const urlInput = document.getElementById('dlUrl');
+    const name = nameInput.value.trim();
+    const url = urlInput.value.trim();
+
+    if (!name || !url) return alert('Enter Name and URL');
+
+    downloadPlan.push({ name, url });
+    updatePlanUI();
+
+    nameInput.value = '';
+    urlInput.value = '';
+}
+
+function updatePlanUI() {
+    const planPanel = document.getElementById('planPanel');
+    const planList = document.getElementById('planList');
+    const planCount = document.getElementById('planCount');
+
+    planCount.innerText = downloadPlan.length;
+    planPanel.style.display = downloadPlan.length > 0 ? 'block' : 'none';
+
+    planList.innerHTML = downloadPlan.map((item, index) => `
+        <div class="plan-item" style="font-size: 0.8em; padding: 5px; border-bottom: 1px solid #444; display: flex; justify-content: space-between;">
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
+            <button onclick="window.removeFromPlan(${index})" style="background:none; border:none; color:red; cursor:pointer;">✕</button>
+        </div>
+    `).join('');
+}
+
+// Global helper to remove from plan
+window.removeFromPlan = (index) => {
+    downloadPlan.splice(index, 1);
+    updatePlanUI();
+};
+
+export function startBatch() {
+    if (downloadPlan.length === 0) return;
+
+    downloadPlan.forEach(task => {
+        fetch('/api/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(task)
+        });
+    });
+
+    downloadPlan = []; // Clear plan
+    updatePlanUI();
+    alert('All tasks added to backend queue!');
+}
 
 export function startDownload() {
-    const nameInput = document.getElementById('dlName'); // 获取 DOM 元素引用
-    const urlInput = document.getElementById('dlUrl');   // 获取 DOM 元素引用
-    
-    const name = nameInput.value;
-    const url = urlInput.value;
+    const nameInput = document.getElementById('dlName');
+    const urlInput = document.getElementById('dlUrl');
+    const name = nameInput.value.trim();
+    const url = urlInput.value.trim();
 
     if (!name || !url) return alert('Provide Name and URL');
     
@@ -18,28 +71,11 @@ export function startDownload() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, url })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            // 1. 弹出成功提示
-            alert(data.message || 'Download started!');
-            
-            // 2. 清空输入框文字
-            nameInput.value = '';
-            urlInput.value = '';
-        } else {
-            // 如果后端返回失败（例如 URL 重复），弹出错误原因，且不强制清空，方便用户修改
-            alert('Error: ' + data.error);
-        }
-    })
-    .catch(err => {
-        console.error('Download request failed:', err);
-        alert('Failed to connect to server.');
+    }).then(() => {
+        nameInput.value = '';
+        urlInput.value = '';
     });
 }
-
-// ... 保持 initDownloader 不变
 
 export function initDownloader() {
     setInterval(() => {
@@ -48,52 +84,48 @@ export function initDownloader() {
         .then(statusMap => {
             const queueContainer = document.getElementById('downloadQueue');
             const queuePanel = document.getElementById('queuePanel');
-            let hasActiveTasks = false;
+            
+            const urls = Object.keys(statusMap);
+            const activeUrls = urls.filter(url => !alertedDownloads.has(url));
+            queuePanel.style.display = activeUrls.length > 0 ? 'block' : 'none';
 
             for (const url in statusMap) {
+                if (alertedDownloads.has(url)) continue;
+
                 const task = statusMap[url];
                 const safeId = 'task-' + url.replace(/[^a-zA-Z0-9]/g, ''); 
+                let taskElement = document.getElementById(safeId);
                 
-                if (task.status === 'downloading') {
-                    hasActiveTasks = true;
-                    const progress = task.progress || 0;
-                    let taskElement = document.getElementById(safeId);
-                    
-                    if (!taskElement) {
-                        taskElement = document.createElement('div');
-                        taskElement.id = safeId;
-                        taskElement.className = 'download-item';
-                        taskElement.innerHTML = `
-                            <div class="dl-title" title="${task.name}">${task.name}</div>
-                            <div class="dl-progress-bg">
-                                <div class="dl-progress-fill" id="fill-${safeId}" style="width: ${progress}%;"></div>
-                            </div>
-                            <div class="dl-percentage" id="text-${safeId}">${progress.toFixed(1)}%</div>
-                        `;
-                        queueContainer.appendChild(taskElement);
-                    } else {
-                        document.getElementById(`fill-${safeId}`).style.width = `${progress}%`;
-                        document.getElementById(`text-${safeId}`).innerText = `${progress.toFixed(1)}%`;
-                    }
+                if (!taskElement) {
+                    taskElement = document.createElement('div');
+                    taskElement.id = safeId;
+                    taskElement.className = 'download-item';
+                    queueContainer.appendChild(taskElement);
                 }
+
+                const progress = task.progress || 0;
+                // Add "waiting" status visual
+                const statusColor = task.status === 'waiting' ? '#f1c40f' : '#3498db';
                 
-                if (task.status === 'completed' && !alertedDownloads.has(url)) {
-                    alert(`✅ Download Finished: ${task.name}`);
+                taskElement.innerHTML = `
+                    <div class="dl-title">${task.name}</div>
+                    <div class="dl-status-text" style="color: ${statusColor}">${task.status}...</div>
+                    <div class="dl-progress-bg">
+                        <div class="dl-progress-fill" style="width: ${progress}%; background: ${statusColor}"></div>
+                    </div>
+                `;
+
+                if (task.status === 'completed') {
                     alertedDownloads.add(url);
-                    const taskElement = document.getElementById(safeId);
-                    if (taskElement) taskElement.remove();
-                    scanLibrary(); 
-                } 
-                else if (task.status === 'failed' && !alertedDownloads.has(url)) {
-                    alert(`❌ Download Failed: ${task.name}. Please check the console.`);
+                    alert(`✅ Finished: ${task.name}`);
+                    taskElement.remove();
+                    window.scanLibrary(); 
+                } else if (task.status === 'failed') {
                     alertedDownloads.add(url);
-                    const taskElement = document.getElementById(safeId);
-                    if (taskElement) taskElement.remove();
+                    alert(`❌ Failed: ${task.name}\nReason: ${task.errorMsg || 'Check Logs'}`);
+                    taskElement.remove();
                 }
             }
-
-            queuePanel.style.display = hasActiveTasks ? 'block' : 'none';
-        })
-        .catch(err => console.error('Status check failed:', err));
+        });
     }, 1000);
 }

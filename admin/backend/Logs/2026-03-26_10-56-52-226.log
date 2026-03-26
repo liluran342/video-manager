@@ -1,0 +1,14 @@
+﻿LOG 2026/03/26
+Save Path: c:\Users\Administrator\video-manager\admin\backend\Logs
+Task Start: 2026/03/26 10:56:52
+Task CommandLine: c:\Users\Administrator\video-manager\admin\backend\N_m3u8DL-RE.exe https://surrit.com/430ceb16-7749-4f76-bea3-50c6e4d00cff/1280x720/video.m3u8 --save-dir E:\整理 --save-name "CARIBBEANCOM-113022-001 " --auto-select --del-after-done --no-ansi-color -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -H "Referer: https://missav.ai/" -H "Origin: https://missav.ai"
+
+10:56:52.226 INFO : N_m3u8DL-RE (Beta version) 20251029
+10:56:52.227 EXTRA: ffmpeg => E:\下载\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\bin\ffmpeg.exe
+10:56:52.227 EXTRA: User-Defined Header => user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+10:56:52.227 EXTRA: User-Defined Header => referer: https://missav.ai/
+10:56:52.227 EXTRA: User-Defined Header => origin: https://missav.ai
+10:56:52.227 INFO : 加载URL: https://surrit.com/430ceb16-7749-4f76-bea3-50c6e4d00cff/1280x720/video.m3u8
+10:56:53.601 INFO : 内容匹配: HTTP Live Streaming
+10:56:53.601 INFO : 正在解析媒体信息...
+10:56:53.606 WARN : 写出meta json

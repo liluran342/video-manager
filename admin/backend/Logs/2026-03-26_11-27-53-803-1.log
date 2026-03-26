@@ -1,0 +1,25 @@
+﻿LOG 2026/03/26
+Save Path: c:\Users\Administrator\video-manager\admin\backend\Logs
+Task Start: 2026/03/26 11:27:53
+Task CommandLine: c:\Users\Administrator\video-manager\admin\backend\N_m3u8DL-RE.exe https://surrit.com/e878ae73-9033-4255-9b6e-e47cbc35809d/1280x720/video.m3u8 --save-dir E:\整理 --save-name "082422-001 Pussy" --auto-select --del-after-done --no-ansi-color -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -H "Referer: https://missav.ai/"
+
+11:27:53.803 INFO : N_m3u8DL-RE (Beta version) 20251029
+11:27:53.803 EXTRA: ffmpeg => E:\下载\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\bin\ffmpeg.exe
+11:27:53.804 EXTRA: User-Defined Header => user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+11:27:53.804 EXTRA: User-Defined Header => referer: https://missav.ai/
+11:27:53.804 INFO : 加载URL: https://surrit.com/e878ae73-9033-4255-9b6e-e47cbc35809d/1280x720/video.m3u8
+11:27:55.320 INFO : 内容匹配: HTTP Live Streaming
+11:27:55.321 INFO : 正在解析媒体信息...
+11:27:55.326 WARN : 写出meta json
+11:27:55.327 INFO : 已解析, 共计 1 条媒体流, 基本流 1 条, 可选音频流 0 条, 可选字幕流 0 条
+11:27:55.327 INFO : Vid Kbps | 309 Segments | ~20m34s
+11:27:55.328 INFO : 已选择的流:
+11:27:55.328 INFO : Vid Kbps | 309 Segments | ~20m34s
+11:27:55.328 WARN : 写出meta json
+11:27:55.334 INFO : 保存文件名: 082422-001 Pussy
+11:27:55.335 INFO : 开始下载...Vid Kbps
+11:27:55.738 WARN : 读取媒体信息...
+11:27:55.758 INFO : [0x100]: Video, h264 (Main) ([27][0][0][0]), 1280x720, 30 fps
+11:27:55.758 INFO : [0x101]: Audio, aac (LC) ([15][0][0][0]), 4 kb/s
+11:29:02.685 INFO : 调用ffmpeg合并中...
+11:29:03.126 INFO : Done

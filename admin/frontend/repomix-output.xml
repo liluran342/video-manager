@@ -1,0 +1,429 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: public/index.html, public/js/**/*
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+public/index.html
+public/js/config.js
+public/js/downloader.js
+public/js/library.js
+public/js/main.js
+public/js/player.js
+public/js/utils.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="public/js/config.js">
+//js/config.js (配置模块)
+export function loadConfig() {
+    fetch('/api/config')
+        .then(res => res.json())
+        .then(cfg => {
+            document.getElementById('videoDir').value = cfg.videoDir || '';
+            document.getElementById('coverDir').value = cfg.coverDir || '';
+            document.getElementById('dbPath').value = cfg.dbPath || '';
+        })
+        .catch(err => console.error('Failed to load config', err));
+}
+
+export function saveConfig() {
+    fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            videoDir: document.getElementById('videoDir').value,
+            coverDir: document.getElementById('coverDir').value,
+            dbPath: document.getElementById('dbPath').value
+        })
+    }).then(() => alert('Settings saved!'));
+}
+</file>
+
+<file path="public/js/library.js">
+//js/library.js (媒体库模块)
+import { formatTime, formatDate } from './utils.js';
+import { playVideo } from './player.js';
+
+export function loadVideos() {
+    const list = document.getElementById('list');
+    list.innerHTML = '';
+
+    fetch('/api/videos').then(res => res.json()).then(data => {
+        data.forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const bgImage = v.cover ? `url('/covers/${v.cover}')` : 'none';
+            const percent = v.duration > 0 ? Math.min((v.progress / v.duration) * 100, 100) : 0;
+
+            card.innerHTML = `
+                <button class="delete-btn" onclick="deleteVideo('${v.id}', event)" title="Delete Video">🗑️</button>
+                <div class="thumb" style="background-image: ${bgImage}">
+                    <div class="badges-top">
+                        <span class="badge format">${(v.format || '').toUpperCase()}</span>
+                        <span class="badge res">${v.resolution || 'Unknown'}</span>
+                    </div>
+                    <span class="badge duration">${formatTime(v.duration)}</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width: ${percent}%;"></div></div>
+                <div class="title" title="${v.name}">${v.name}</div>
+                <div class="added-date">Added: ${formatDate(v.added_at)}</div>
+            `;
+
+            // 修复了原代码被覆盖的Bug，现在点击卡片会正常忽略垃圾桶按钮的事件
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.delete-btn')) {
+                    playVideo(v.id, v.name, v.progress);
+                }
+            });
+
+            list.appendChild(card);
+        });
+    });
+}
+
+export function deleteVideo(id, event) {
+    event.stopPropagation(); 
+
+    if (!confirm('Are you sure you want to delete this video? The actual file will be permanently removed from your disk.')) return;
+
+    fetch('/api/videos/' + id, { method: 'DELETE' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            loadVideos(); 
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(err => alert('Request failed: ' + err));
+}
+
+export function scanLibrary() {
+    fetch('/api/scan', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => { 
+        alert(data.message); 
+        setTimeout(loadVideos, 3000); 
+    });
+}
+</file>
+
+<file path="public/js/main.js">
+//js/main.js (入口模块)
+import { loadConfig, saveConfig } from './config.js';
+import { loadVideos, deleteVideo, scanLibrary } from './library.js';
+import { initPlayer, closePlayer } from './player.js';
+import { initDownloader, startDownload } from './downloader.js';
+
+// 1. 将内联 HTML (onclick="...") 需要用到的函数挂载到全局对象 window
+window.saveConfig = saveConfig;
+window.deleteVideo = deleteVideo;
+window.scanLibrary = scanLibrary;
+window.closePlayer = closePlayer;
+window.startDownload = startDownload;
+
+// 2. 页面加载完成后进行初始化
+document.addEventListener('DOMContentLoaded', () => {
+    initPlayer();
+    loadConfig();
+    loadVideos();
+    initDownloader();
+});
+</file>
+
+<file path="public/js/player.js">
+//js/player.js (播放器模块)
+import { loadVideos } from './library.js';
+
+let currentVideoId = null;
+let saveProgressInterval = null;
+
+export function playVideo(id, name, progress) {
+    currentVideoId = id;
+    const player = document.getElementById('player');
+    const modal = document.getElementById('playerModal');
+    
+    document.getElementById('nowPlayingTitle').innerText = name;
+    player.src = '/api/play/' + id;
+    
+    // Jump to saved progress when video metadata is loaded
+    player.onloadedmetadata = () => {
+        if (progress > 0) player.currentTime = progress;
+    };
+    
+    modal.style.display = 'flex';
+    player.play();
+
+    // Auto-save progress every 5 seconds while playing
+    saveProgressInterval = setInterval(() => {
+        if (!player.paused && currentVideoId) {
+            saveProgress(currentVideoId, player.currentTime);
+        }
+    }, 5000);
+}
+
+function saveProgress(id, time) {
+    fetch('/api/progress/' + id, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ progress: time })
+    });
+}
+
+export function closePlayer() {
+    const player = document.getElementById('player');
+    
+    // Save final progress before closing
+    if (currentVideoId && player.currentTime > 0) {
+        saveProgress(currentVideoId, player.currentTime);
+    }
+    
+    clearInterval(saveProgressInterval);
+    currentVideoId = null;
+    
+    document.getElementById('playerModal').style.display = 'none';
+    player.pause();
+    player.src = ''; 
+    
+    // Reload the list so the red progress bar updates visually
+    loadVideos();
+}
+
+export function initPlayer() {
+    document.getElementById('playerModal').addEventListener('click', function(e) {
+        if (e.target === this) closePlayer();
+    });
+}
+</file>
+
+<file path="public/js/utils.js">
+//js/utils.js (工具模块)
+export function formatTime(seconds) {
+    if (!seconds) return '00:00';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    return h > 0 
+        ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}` 
+        : `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+export function formatDate(timestamp) {
+    if (!timestamp) return 'Unknown Date';
+    const d = new Date(timestamp);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+</file>
+
+<file path="public/js/downloader.js">
+//js/downloader.js (下载模块)
+import { scanLibrary } from './library.js';
+
+let alertedDownloads = new Set();
+
+// js/downloader.js
+
+export function startDownload() {
+    const nameInput = document.getElementById('dlName'); // 获取 DOM 元素引用
+    const urlInput = document.getElementById('dlUrl');   // 获取 DOM 元素引用
+    
+    const name = nameInput.value;
+    const url = urlInput.value;
+
+    if (!name || !url) return alert('Provide Name and URL');
+    
+    fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, url })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // 1. 弹出成功提示
+            alert(data.message || 'Download started!');
+            
+            // 2. 清空输入框文字
+            nameInput.value = '';
+            urlInput.value = '';
+        } else {
+            // 如果后端返回失败（例如 URL 重复），弹出错误原因，且不强制清空，方便用户修改
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(err => {
+        console.error('Download request failed:', err);
+        alert('Failed to connect to server.');
+    });
+}
+
+// ... 保持 initDownloader 不变
+
+export function initDownloader() {
+    setInterval(() => {
+        fetch('/api/downloads/status')
+        .then(res => res.json())
+        .then(statusMap => {
+            const queueContainer = document.getElementById('downloadQueue');
+            const queuePanel = document.getElementById('queuePanel');
+            let hasActiveTasks = false;
+
+            for (const url in statusMap) {
+                const task = statusMap[url];
+                const safeId = 'task-' + url.replace(/[^a-zA-Z0-9]/g, ''); 
+                
+                if (task.status === 'downloading') {
+                    hasActiveTasks = true;
+                    const progress = task.progress || 0;
+                    let taskElement = document.getElementById(safeId);
+                    
+                    if (!taskElement) {
+                        taskElement = document.createElement('div');
+                        taskElement.id = safeId;
+                        taskElement.className = 'download-item';
+                        taskElement.innerHTML = `
+                            <div class="dl-title" title="${task.name}">${task.name}</div>
+                            <div class="dl-progress-bg">
+                                <div class="dl-progress-fill" id="fill-${safeId}" style="width: ${progress}%;"></div>
+                            </div>
+                            <div class="dl-percentage" id="text-${safeId}">${progress.toFixed(1)}%</div>
+                        `;
+                        queueContainer.appendChild(taskElement);
+                    } else {
+                        document.getElementById(`fill-${safeId}`).style.width = `${progress}%`;
+                        document.getElementById(`text-${safeId}`).innerText = `${progress.toFixed(1)}%`;
+                    }
+                }
+                
+                if (task.status === 'completed' && !alertedDownloads.has(url)) {
+                    alert(`✅ Download Finished: ${task.name}`);
+                    alertedDownloads.add(url);
+                    const taskElement = document.getElementById(safeId);
+                    if (taskElement) taskElement.remove();
+                    scanLibrary(); 
+                } 
+                else if (task.status === 'failed' && !alertedDownloads.has(url)) {
+                    alert(`❌ Download Failed: ${task.name}. Please check the console.`);
+                    alertedDownloads.add(url);
+                    const taskElement = document.getElementById(safeId);
+                    if (taskElement) taskElement.remove();
+                }
+            }
+
+            queuePanel.style.display = hasActiveTasks ? 'block' : 'none';
+        })
+        .catch(err => console.error('Status check failed:', err));
+    }, 1000);
+}
+</file>
+
+<file path="public/index.html">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Video Library</title>
+    <link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/sidebar-widgets.css">
+<link rel="stylesheet" href="css/video-grid.css">
+<link rel="stylesheet" href="css/player.css">
+</head>
+<body>
+
+<div class="app">
+    <div class="sidebar">
+        <h2>🎬 Video Manager</h2>
+        <div class="panel">
+            <h3>📥 Download</h3>
+            <div class="form-group"><label>Video Name</label><input id="dlName"></div>
+            <div class="form-group"><label>m3u8 URL</label><input id="dlUrl"></div>
+            <button class="btn-primary" onclick="startDownload()">Download Video</button>
+        </div>
+        <div class="panel">
+            <h3>⚙️ Settings</h3>
+            <div class="form-group"><label>Video Storage</label><input id="videoDir"></div>
+            <div class="form-group"><label>Cover Storage</label><input id="coverDir"></div>
+            <div class="form-group"><label>DB Storage</label><input id="dbPath"></div>
+            <button class="btn-primary" onclick="saveConfig()">Save Settings</button>
+        </div>
+        <!-- Active Downloads Panel -->
+        <div class="panel" id="queuePanel" style="display: none;">
+            <h3>🔄 Active Downloads</h3>
+            <div id="downloadQueue"></div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="header">
+            <h1>My Library</h1>
+            <button class="btn-primary btn-scan" style="width: auto; padding: 10px 20px;" onclick="scanLibrary()">🔄 Scan Library</button>
+        </div>
+        <div class="grid" id="list"></div>
+    </div>
+</div>
+
+<div id="playerModal" class="player-modal">
+    <div class="player-content">
+        <div class="player-header">
+            <span id="nowPlayingTitle" class="player-title">Loading...</span>
+            <span class="close-btn" onclick="closePlayer()">✖</span>
+        </div>
+        <video id="player" controls></video>
+    </div>
+</div>
+
+<!-- 其他 HTML 内容... -->
+
+<!-- 引入入口脚本，浏览器会自动按需加载其他互相依赖的模块 -->
+<script type="module" src="./js/main.js"></script>
+
+</body>
+</html>
+</body>
+</html>
+</file>
+
+</files>

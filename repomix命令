@@ -1,0 +1,21 @@
+npx repomix admin/frontend --include "public/index.html,public/js/**/*"
+
+原理：
+
+    手动指定 admin/frontend 为扫描起点。
+
+    --include 明确只包含 html 和 js。
+
+    注意：多个路径用逗号隔开，不要带空格。
+
+
+ 把 repomix 的输出文件放到 backend 目录里（而不是项目根目录）
+
+直接用 -o 指定路径就行。
+
+✅ 正确命令（你直接用）
+npx repomix admin/backend -o admin/backend/repomix-output.xml
+
+
+npx repomix admin/frontend --include "public/index.html,public/js/**/*" -o admin/frontend/repomix-output.xml
+

@@ -1,0 +1,404 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+db/database.js
+routes/config.js
+routes/download.js
+routes/video.js
+server.js
+services/downloadService.js
+services/videoService.js
+utils/configHelper.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="db/database.js">
+//db/database.js (数据库)
+const Database = require('better-sqlite3');
+const { loadConfig } = require('../utils/configHelper');
+
+const config = loadConfig();
+const db = new Database(config.dbPath);
+
+// 初始化表结构
+db.exec(`
+    CREATE TABLE IF NOT EXISTS videos (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        format TEXT,
+        duration REAL,
+        cover TEXT,
+        filepath TEXT UNIQUE,
+        resolution TEXT,
+        progress REAL DEFAULT 0,
+        added_at INTEGER DEFAULT 0
+    );
+    CREATE TABLE IF NOT EXISTS download_history (
+        url TEXT PRIMARY KEY,
+        name TEXT,
+        added_at INTEGER
+    );
+`);
+
+// 迁移脚本
+try { db.exec("ALTER TABLE videos ADD COLUMN resolution TEXT DEFAULT 'Unknown'"); } catch (e) {}
+try { db.exec("ALTER TABLE videos ADD COLUMN progress REAL DEFAULT 0"); } catch (e) {}
+try { db.exec("ALTER TABLE videos ADD COLUMN added_at INTEGER DEFAULT 0"); } catch (e) {}
+
+module.exports = db;
+</file>
+
+<file path="routes/config.js">
+const express = require('express');
+const router = express.Router();
+const { loadConfig, saveConfig } = require('../utils/configHelper');
+
+// 获取当前配置: GET /api/config
+router.get('/', (req, res) => {
+    try {
+        const config = loadConfig();
+        res.json(config);
+    } catch (err) {
+        res.status(500).json({ success: false, error: '无法读取配置文件' });
+    }
+});
+
+// 保存新配置: POST /api/config
+router.post('/', (req, res) => {
+    try {
+        const newConfig = req.body;
+        // 简单校验
+        if (!newConfig.videoDir || !newConfig.dbPath) {
+            return res.status(400).json({ success: false, error: '配置参数不完整' });
+        }
+        saveConfig(newConfig);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, error: '保存配置文件失败' });
+    }
+});
+
+module.exports = router;
+</file>
+
+<file path="routes/download.js">
+const express = require('express');
+const router = express.Router();
+const db = require('../db/database');
+const { loadConfig } = require('../utils/configHelper');
+const { downloadStatus, startDownload } = require('../services/downloadService');
+
+// 获取所有下载任务状态: GET /api/download/status
+router.get('/status', (req, res) => {
+    res.json(downloadStatus);
+});
+
+// 提交新的下载任务: POST /api/download
+router.post('/', (req, res) => {
+    const { name, url } = req.body;
+
+    // 基础校验
+    if (!name || !url) {
+        return res.status(400).json({ success: false, error: '参数不完整' });
+    }
+
+    try {
+        // 1. 检查数据库历史记录（是否曾经下载过）
+        const existing = db.prepare('SELECT name FROM download_history WHERE url = ?').get(url);
+        if (existing) {
+            return res.json({ 
+                success: false, 
+                error: `该 URL 之前已下载过，保存名称为: ${existing.name}` 
+            });
+        }
+
+        // 2. 检查内存中是否正在运行（是否正在下载中）
+        if (downloadStatus[url] && downloadStatus[url].status === 'downloading') {
+            return res.json({ success: false, error: '该任务已在下载队列中，请勿重复提交' });
+        }
+
+        // 3. 启动异步下载
+        const cfg = loadConfig();
+        // 调用 Service 层封装好的下载逻辑
+        startDownload(name, url, cfg.videoDir);
+
+        res.json({ 
+            success: true, 
+            message: '下载指令已发送，后台开始执行' 
+        });
+        
+    } catch (err) {
+        console.error('Download route error:', err);
+        res.status(500).json({ success: false, error: '服务器内部错误' });
+    }
+});
+
+module.exports = router;
+</file>
+
+<file path="routes/video.js">
+//routes/video.js (视频接口)
+const express = require('express');
+const router = express.Router();
+const db = require('../db/database');
+const fs = require('fs');
+const { loadConfig } = require('../utils/configHelper');
+const { scanDirectory } = require('../services/videoService');
+
+router.get('/', (req, res) => {
+    const videos = db.prepare('SELECT id, name, format, duration, cover, resolution, progress, added_at FROM videos ORDER BY name ASC').all();
+    res.json(videos);
+});
+
+router.get('/play/:id', (req, res) => {
+    const video = db.prepare('SELECT filepath FROM videos WHERE id = ?').get(req.params.id);
+    if (video && fs.existsSync(video.filepath)) {
+        res.sendFile(video.filepath);
+    } else {
+        res.status(404).send('Video not found');
+    }
+});
+
+router.post('/progress/:id', express.json(), (req, res) => {
+    const { progress } = req.body;
+    db.prepare('UPDATE videos SET progress = ? WHERE id = ?').run(progress, req.params.id);
+    res.json({ success: true });
+});
+
+router.post('/scan', async (req, res) => {
+    const cfg = loadConfig();
+    res.json({ success: true, message: 'Scan started.' });
+    await scanDirectory(cfg.videoDir, cfg.coverDir);
+});
+
+module.exports = router;
+</file>
+
+<file path="services/downloadService.js">
+//services/downloadService.js (下载处理逻辑)
+const { spawn } = require('child_process');
+const db = require('../db/database');
+const { ensureDir } = require('../utils/configHelper');
+const path = require('path');
+
+const downloadStatus = {};
+
+function parseProgress(data, url) {
+    const text = data.toString('utf-8'); 
+    const matches = [...text.matchAll(/([\d\.]+)%/g)];
+    if (matches.length > 0) {
+        const latestMatch = matches[matches.length - 1][1];
+        const percent = parseFloat(latestMatch);
+        if (!isNaN(percent) && percent > downloadStatus[url].progress && percent <= 100) {
+            downloadStatus[url].progress = percent;
+        }
+    }
+}
+
+function startDownload(name, url, saveDir) {
+    ensureDir(saveDir);
+    downloadStatus[url] = { name, status: 'downloading', progress: 0 };
+
+    const downloader = spawn('N_m3u8DL-RE.exe', [
+        url, 
+        '--save-dir', saveDir, 
+        '--save-name', name,
+        '--auto-select',       
+        '--del-after-done',    
+        '-H', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    ]);
+
+    downloader.stdout.on('data', data => parseProgress(data, url));
+    downloader.stderr.on('data', data => parseProgress(data, url));
+    
+    downloader.on('close', code => {
+        if (code === 0) {
+            downloadStatus[url].status = 'completed';
+            downloadStatus[url].progress = 100;
+            try {
+                db.prepare('INSERT INTO download_history (url, name, added_at) VALUES (?, ?, ?)')
+                  .run(url, name, Date.now());
+            } catch (e) { console.error('DB Insert Error:', e); }
+        } else {
+            downloadStatus[url].status = 'failed';
+        }
+    });
+}
+
+module.exports = { downloadStatus, startDownload };
+</file>
+
+<file path="services/videoService.js">
+//services/videoService.js (视频处理逻辑)
+const ffmpeg = require('fluent-ffmpeg');
+const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs');
+const db = require('../db/database');
+
+async function extractVideoInfo(filePath, coverDir) {
+    return new Promise((resolve) => {
+        ffmpeg.ffprobe(filePath, (err, metadata) => {
+            if (err) return resolve({ duration: 0, coverName: null, resolution: 'Unknown' });
+            
+            const duration = metadata.format.duration;
+            const coverName = crypto.randomUUID() + '.jpg';
+            
+            let resolution = 'Unknown';
+            const videoStream = metadata.streams.find(s => s.codec_type === 'video');
+            if (videoStream && videoStream.height) {
+                if (videoStream.height >= 2160) resolution = '4K';
+                else if (videoStream.height >= 1080) resolution = '1080p';
+                else if (videoStream.height >= 720) resolution = '720p';
+                else resolution = `${videoStream.width}x${videoStream.height}`;
+            }
+            
+            ffmpeg(filePath)
+                .on('end', () => resolve({ duration, coverName, resolution }))
+                .on('error', () => resolve({ duration, coverName: null, resolution }))
+                .screenshots({
+                    timestamps: ['20%'], 
+                    filename: coverName,
+                    folder: coverDir,
+                    size: '320x240'
+                });
+        });
+    });
+}
+
+async function scanDirectory(videoDir, coverDir) {
+    const dir = path.resolve(videoDir);
+    const files = fs.readdirSync(dir);
+    const videos = files.filter(f => f.endsWith('.mp4') || f.endsWith('.mkv'));
+
+    const insertStmt = db.prepare('INSERT INTO videos (id, name, format, duration, cover, filepath, resolution, added_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    const checkStmt = db.prepare('SELECT id FROM videos WHERE filepath = ?');
+
+    for (const file of videos) {
+        const filePath = path.join(dir, file);
+        if (checkStmt.get(filePath)) continue;
+
+        const ext = path.extname(file);
+        const name = path.basename(file, ext);
+        const id = crypto.randomUUID();
+        const stat = fs.statSync(filePath);
+        const addedAt = stat.birthtimeMs || stat.mtimeMs || Date.now();
+
+        try {
+            const info = await extractVideoInfo(filePath, coverDir);
+            insertStmt.run(id, name, ext.replace('.', ''), info.duration, info.coverName, filePath, info.resolution, addedAt);
+        } catch (err) {
+            console.error(`Error processing ${file}:`, err);
+        }
+    }
+}
+
+module.exports = { extractVideoInfo, scanDirectory };
+</file>
+
+<file path="utils/configHelper.js">
+//utils/configHelper.js (配置管理)
+const fs = require('fs');
+const path = require('path');
+
+const CONFIG_PATH = './config.json';
+
+function loadConfig() {
+    if (!fs.existsSync(CONFIG_PATH)) {
+        return { videoDir: 'E:\\整理', coverDir: './covers', dbPath: './video.db' };
+    }
+    return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+}
+
+function saveConfig(config) {
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+}
+
+function ensureDir(dir) {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+module.exports = { loadConfig, saveConfig, ensureDir };
+</file>
+
+<file path="server.js">
+const express = require('express');
+const path = require('path');
+const { loadConfig, ensureDir } = require('./utils/configHelper');
+
+const app = express();
+const PORT = 3000;
+const config = loadConfig();
+
+// 确保目录存在
+ensureDir(config.videoDir);
+ensureDir(config.coverDir);
+
+// 静态文件
+app.use(express.static(
+  path.join(__dirname, '../frontend/public')
+));
+app.use('/covers', express.static(config.coverDir));
+app.use(express.json());
+
+// 路由拆分
+const configRoutes = require('./routes/config');
+const videoRoutes = require('./routes/video');
+const downloadRoutes = require('./routes/download');
+
+app.use('/api/config', configRoutes);
+app.use('/api/videos', videoRoutes);
+app.use('/api/download', downloadRoutes);  // 处理 /api/download (POST)
+app.use('/api/downloads', downloadRoutes); // 处理 /api/downloads/status (GET)
+
+// 特殊路由（播放与进度在 video 路由里已处理，注意前缀）
+// 如果你希望保持原样 API，可以这样映射：
+app.use('/api', videoRoutes); // 包含 /api/play/:id 和 /api/progress/:id
+
+app.listen(PORT, () => {
+    console.log(`Server running at: http://localhost:${PORT}`);
+});
+</file>
+
+</files>

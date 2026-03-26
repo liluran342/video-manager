@@ -14,12 +14,30 @@
 <div class="app">
     <div class="sidebar">
         <h2>🎬 Video Manager</h2>
-        <div class="panel">
-            <h3>📥 Download</h3>
-            <div class="form-group"><label>Video Name</label><input id="dlName"></div>
-            <div class="form-group"><label>m3u8 URL</label><input id="dlUrl"></div>
-            <button class="btn-primary" onclick="startDownload()">Download Video</button>
-        </div>
+      
+        <!-- Inside <div class="sidebar"> -->
+<div class="panel">
+    <h3>📥 New Task</h3>
+    <div class="form-group"><label>Name</label><input id="dlName"></div>
+    <div class="form-group"><label>URL</label><input id="dlUrl"></div>
+    <div style="display: flex; gap: 5px;">
+        <button class="btn-primary" onclick="startDownload()" style="flex: 1;">Download Now</button>
+        <button class="btn-primary" onclick="addToPlan()" style="flex: 1; background: #2ecc71;">Add to Plan</button>
+    </div>
+</div>
+
+<!-- New Batch Plan Panel -->
+<div class="panel" id="planPanel" style="display: none;">
+    <h3>📋 Download Plan (<span id="planCount">0</span>)</h3>
+    <div id="planList" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
+    <button class="btn-primary" onclick="startBatch()" style="background: #f1c40f; color: #000;">🚀 Start Batch Download</button>
+</div>
+
+<!-- Active Downloads (Existing) -->
+<div class="panel" id="queuePanel" style="display: none;">
+    <h3>🔄 Active Queue</h3>
+    <div id="downloadQueue"></div>
+</div>
         <div class="panel">
             <h3>⚙️ Settings</h3>
             <div class="form-group"><label>Video Storage</label><input id="videoDir"></div>
@@ -41,14 +59,19 @@
         <div class="grid" id="list"></div>
     </div>
 </div>
-
-<div id="playerModal" class="player-modal">
+<div id="playerModal" class="player-modal"> <!-- Check this ID -->
     <div class="player-content">
         <div class="player-header">
             <span id="nowPlayingTitle" class="player-title">Loading...</span>
-            <span class="close-btn" onclick="closePlayer()">✖</span>
+            <div class="player-controls">
+                <!-- Our new button -->
+                <button class="btn-capture" onclick="captureCover()">📸 Capture Cover</button>
+                <span class="close-btn" onclick="closePlayer()">✖</span>
+            </div>
         </div>
         <video id="player" controls></video>
+        <!-- Added canvas for capture -->
+        <canvas id="captureCanvas" style="display: none;"></canvas>
     </div>
 </div>
 

@@ -1,0 +1,28 @@
+﻿LOG 2026/03/26
+Save Path: c:\Users\Administrator\video-manager\admin\backend\Logs
+Task Start: 2026/03/26 10:49:08
+Task CommandLine: c:\Users\Administrator\video-manager\admin\backend\N_m3u8DL-RE.exe https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8 --save-dir E:\整理 --save-name CARIBBEANCOM-032526-001 --auto-select --del-after-done --no-ansi-color -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+10:49:08.460 INFO : N_m3u8DL-RE (Beta version) 20251029
+10:49:08.460 EXTRA: ffmpeg => E:\下载\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\bin\ffmpeg.exe
+10:49:08.461 EXTRA: User-Defined Header => user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+10:49:08.461 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:09.668 WARN : Response status code does not indicate success: 403 (Forbidden). (1/10)
+10:49:11.181 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:16.185 WARN : The SSL connection could not be established, see inner exception. (2/10)
+10:49:17.695 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:18.846 WARN : Response status code does not indicate success: 403 (Forbidden). (3/10)
+10:49:20.356 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:21.267 WARN : Response status code does not indicate success: 403 (Forbidden). (4/10)
+10:49:22.770 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:23.963 WARN : Response status code does not indicate success: 403 (Forbidden). (5/10)
+10:49:25.475 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:26.365 WARN : Response status code does not indicate success: 403 (Forbidden). (6/10)
+10:49:27.876 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:28.828 WARN : Response status code does not indicate success: 403 (Forbidden). (7/10)
+10:49:30.343 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:31.280 WARN : Response status code does not indicate success: 403 (Forbidden). (8/10)
+10:49:32.784 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:34.262 WARN : Response status code does not indicate success: 403 (Forbidden). (9/10)
+10:49:35.777 INFO : 加载URL: https://surrit.com/dea191a0-bfe6-4e6a-a145-618e0cad3841/720p/video.m3u8
+10:49:36.689 WARN : Response status code does not indicate success: 403 (Forbidden). (10/10)
