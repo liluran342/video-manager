@@ -64,28 +64,46 @@ function processQueue() {
         }
     });
 
-    downloader.on('close', code => {
-        activeDownloads--;
-        if (downloadStatus[url]) {
-            if (code === 0) {
-                downloadStatus[url].status = 'completed';
-                downloadStatus[url].progress = 100;
-                try {
-                    db.prepare('INSERT INTO download_history (url, name, added_at) VALUES (?, ?, ?)')
-                      .run(url, name, Date.now());
-                } catch (e) {}
-            } else {
-                downloadStatus[url].status = 'failed';
-                downloadStatus[url].errorMsg = downloadStatus[url].logs.join('\n');
+ downloader.on('close', code => {
+    activeDownloads--;
+
+    if (downloadStatus[url]) {
+        if (code === 0) {
+            // SUCCESS CASE
+            downloadStatus[url].status = 'completed';
+            downloadStatus[url].progress = 100;
+            try {
+                // Update the status to 'completed' so it's blocked from being added again
+                db.prepare('UPDATE download_history SET status = ?, added_at = ? WHERE url = ?')
+                  .run('completed', Date.now(), url);
+            } catch (e) { 
+                console.error('DB Update Error (Success):', e); 
+            }
+        } else {
+            // FAILURE CASE
+            downloadStatus[url].status = 'failed';
+            // Save logs as error message for the frontend to display
+            downloadStatus[url].errorMsg = downloadStatus[url].logs.join('\n');
+            
+            try {
+                // Update the status to 'failed'. 
+                // This allows the user to try downloading this URL again later.
+                db.prepare('UPDATE download_history SET status = ? WHERE url = ?')
+                  .run('failed', url);
+            } catch (e) { 
+                console.error('DB Update Error (Failure):', e); 
             }
         }
-        
-        // Clean up memory after 1 minute
-        setTimeout(() => { delete downloadStatus[url]; }, 60000);
-        
-        // Start next task in queue
-        processQueue();
-    });
+    }
+
+    // 1. Remove from memory after 1 minute so frontend alerts stop
+    setTimeout(() => { 
+        if (downloadStatus[url]) delete downloadStatus[url]; 
+    }, 60000);
+    
+    // 2. CRITICAL: Trigger the next item in the queue
+    processQueue();
+});
 }
 
 // ... Keep your parseProgress function here ...

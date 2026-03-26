@@ -1,86 +1,136 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Video Library</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Admin System</title>
     <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/sidebar-widgets.css">
-<link rel="stylesheet" href="css/video-grid.css">
-<link rel="stylesheet" href="css/player.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/sidebar-widgets.css">
+    <link rel="stylesheet" href="css/video-grid.css">
+    <link rel="stylesheet" href="css/player.css">
 </head>
 <body>
 
-<div class="app">
-    <div class="sidebar">
-        <h2>🎬 Video Manager</h2>
-      
-        <!-- Inside <div class="sidebar"> -->
-<div class="panel">
-    <h3>📥 New Task</h3>
-    <div class="form-group"><label>Name</label><input id="dlName"></div>
-    <div class="form-group"><label>URL</label><input id="dlUrl"></div>
-    <div style="display: flex; gap: 5px;">
-        <button class="btn-primary" onclick="startDownload()" style="flex: 1;">Download Now</button>
-        <button class="btn-primary" onclick="addToPlan()" style="flex: 1; background: #2ecc71;">Add to Plan</button>
-    </div>
+<div class="admin-wrapper">
+    <!-- Left Sidebar: Navigation -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">🎬</span>
+            <span class="logo-text">VideoAdmin</span>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" onclick="showSection('library')">
+                <span class="icon">📁</span> My Library
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('downloader')">
+                <span class="icon">📥</span> Download Center
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('settings')">
+                <span class="icon">⚙️</span> System Settings
+            </a>
+            <!-- Future links go here -->
+            <a href="#" class="nav-item disabled">
+                <span class="icon">📊</span> Statistics (Soon)
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>Server Status: <span class="status-online">Online</span></p>
+        </div>
+    </aside>
+
+    <!-- Right Main Content -->
+    <main class="admin-main">
+        <!-- Top Navbar -->
+        <header class="top-navbar">
+            <h2 id="section-title">My Library</h2>
+            <div class="top-actions">
+                <button class="btn-refresh" onclick="scanLibrary()">🔄 Scan Disk</button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Sections -->
+        <div class="content-body">
+            
+            <!-- Section: Library -->
+            <section id="section-library" class="admin-section">
+                <div class="grid" id="list">
+                    <!-- Cards will be injected here -->
+                </div>
+            </section>
+
+            <!-- Section: Downloader -->
+            <section id="section-downloader" class="admin-section" style="display: none;">
+                <div class="admin-card">
+                    <h3>Add New Task</h3>
+                    <div class="download-form">
+                        <div class="input-row">
+                            <input id="dlName" type="text" placeholder="Video Filename">
+                            <input id="dlUrl" type="text" placeholder="m3u8 URL">
+                        </div>
+                        <div class="button-row">
+                            <button class="btn-primary" onclick="startDownload()">Download Now</button>
+                            <button class="btn-secondary" onclick="addToPlan()">+ Add to Plan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="queue-container">
+                    <div class="queue-column">
+                        <h3>📋 Planned Tasks</h3>
+                        <div id="planList" class="plan-list"></div>
+                        <button id="btnStartBatch" class="btn-batch" onclick="startBatch()">🚀 Execute Plan</button>
+                    </div>
+                    <div class="queue-column">
+                        <h3>🔄 Progress</h3>
+                        <div id="downloadQueue"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Settings -->
+            <section id="section-settings" class="admin-section" style="display: none;">
+                <div class="admin-card">
+                    <h3>Storage Configuration</h3>
+                    <div class="form-group"><label>Video Directory</label><input id="videoDir"></div>
+                    <div class="form-group"><label>Cover Directory</label><input id="coverDir"></div>
+                    <div class="form-group"><label>Database Path</label><input id="dbPath"></div>
+                    <button class="btn-primary" onclick="saveConfig()">Save Settings</button>
+                </div>
+            </section>
+
+        </div>
+    </main>
 </div>
 
-<!-- New Batch Plan Panel -->
-<div class="panel" id="planPanel" style="display: none;">
-    <h3>📋 Download Plan (<span id="planCount">0</span>)</h3>
-    <div id="planList" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
-    <button class="btn-primary" onclick="startBatch()" style="background: #f1c40f; color: #000;">🚀 Start Batch Download</button>
-</div>
-
-<!-- Active Downloads (Existing) -->
-<div class="panel" id="queuePanel" style="display: none;">
-    <h3>🔄 Active Queue</h3>
-    <div id="downloadQueue"></div>
-</div>
-        <div class="panel">
-            <h3>⚙️ Settings</h3>
-            <div class="form-group"><label>Video Storage</label><input id="videoDir"></div>
-            <div class="form-group"><label>Cover Storage</label><input id="coverDir"></div>
-            <div class="form-group"><label>DB Storage</label><input id="dbPath"></div>
-            <button class="btn-primary" onclick="saveConfig()">Save Settings</button>
-        </div>
-        <!-- Active Downloads Panel -->
-        <div class="panel" id="queuePanel" style="display: none;">
-            <h3>🔄 Active Downloads</h3>
-            <div id="downloadQueue"></div>
-        </div>
-    </div>
-    <div class="main">
-        <div class="header">
-            <h1>My Library</h1>
-            <button class="btn-primary btn-scan" style="width: auto; padding: 10px 20px;" onclick="scanLibrary()">🔄 Scan Library</button>
-        </div>
-        <div class="grid" id="list"></div>
-    </div>
-</div>
-<div id="playerModal" class="player-modal"> <!-- Check this ID -->
+<!-- Player Modal (Same as before) -->
+<div id="playerModal" class="player-modal">
     <div class="player-content">
         <div class="player-header">
             <span id="nowPlayingTitle" class="player-title">Loading...</span>
             <div class="player-controls">
-                <!-- Our new button -->
-                <button class="btn-capture" onclick="captureCover()">📸 Capture Cover</button>
+                <button class="btn-capture" onclick="captureCover()">📸 Capture</button>
                 <span class="close-btn" onclick="closePlayer()">✖</span>
             </div>
         </div>
         <video id="player" controls></video>
-        <!-- Added canvas for capture -->
         <canvas id="captureCanvas" style="display: none;"></canvas>
     </div>
 </div>
 
-<!-- 其他 HTML 内容... -->
-
-<!-- 引入入口脚本，浏览器会自动按需加载其他互相依赖的模块 -->
 <script type="module" src="./js/main.js"></script>
-
-</body>
-</html>
+<script>
+    // Simple UI switch logic
+    function showSection(sectionId) {
+        document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        
+        document.getElementById('section-' + sectionId).style.display = 'block';
+        event.currentTarget.classList.add('active');
+        document.getElementById('section-title').innerText = event.currentTarget.innerText.trim();
+    }
+</script>
 </body>
 </html>

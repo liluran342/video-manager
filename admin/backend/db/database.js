@@ -21,6 +21,7 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS download_history (
         url TEXT PRIMARY KEY,
         name TEXT,
+        status TEXT DEFAULT 'downloading', -- Added: downloading, completed, failed
         added_at INTEGER
     );
 `);
@@ -29,5 +30,6 @@ db.exec(`
 try { db.exec("ALTER TABLE videos ADD COLUMN resolution TEXT DEFAULT 'Unknown'"); } catch (e) {}
 try { db.exec("ALTER TABLE videos ADD COLUMN progress REAL DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE videos ADD COLUMN added_at INTEGER DEFAULT 0"); } catch (e) {}
+try { db.exec("ALTER TABLE download_history ADD COLUMN status TEXT DEFAULT 'completed'"); } catch (e) {}
 
 module.exports = db;

@@ -1,0 +1,23 @@
+﻿LOG 2026/03/26
+Save Path: c:\Users\Administrator\video-manager\admin\backend\Logs
+Task Start: 2026/03/26 15:33:36
+Task CommandLine: c:\Users\Administrator\video-manager\admin\backend\N_m3u8DL-RE.exe https://surrit.com/55598268-119e-474d-b9c7-28c2468ceccf/1920x1080/video.m3u8 --save-dir E:\整理 --save-name "KAWD-339 Kawaii" --auto-select --del-after-done --no-ansi-color -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -H "Referer: https://missav.ai/"
+
+15:33:36.980 INFO : N_m3u8DL-RE (Beta version) 20251029
+15:33:36.980 EXTRA: ffmpeg => E:\下载\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\ffmpeg-2025-10-21-git-535d4047d3-essentials_build\bin\ffmpeg.exe
+15:33:36.981 EXTRA: User-Defined Header => user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+15:33:36.981 EXTRA: User-Defined Header => referer: https://missav.ai/
+15:33:36.981 INFO : 加载URL: https://surrit.com/55598268-119e-474d-b9c7-28c2468ceccf/1920x1080/video.m3u8
+15:33:38.102 INFO : 内容匹配: HTTP Live Streaming
+15:33:38.102 INFO : 正在解析媒体信息...
+15:33:38.146 WARN : 写出meta json
+15:33:38.149 INFO : 已解析, 共计 1 条媒体流, 基本流 1 条, 可选音频流 0 条, 可选字幕流 0 条
+15:33:38.149 INFO : Vid Kbps | 3274 Segments | ~03h38m12s
+15:33:38.155 INFO : 已选择的流:
+15:33:38.156 INFO : Vid Kbps | 3274 Segments | ~03h38m12s
+15:33:38.156 WARN : 写出meta json
+15:33:38.159 INFO : 保存文件名: KAWD-339 Kawaii
+15:33:38.159 INFO : 开始下载...Vid Kbps
+15:33:38.701 WARN : 读取媒体信息...
+15:33:38.930 INFO : [0x100]: Video, h264 (Main) ([27][0][0][0]), 1920x1080, 30 fps
+15:33:38.930 INFO : [0x101]: Audio, aac (LC) ([15][0][0][0]), 237 kb/s

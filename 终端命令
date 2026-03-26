@@ -1,2 +1,2 @@
 创建空文件
-type nul > repomix.config.json
+type nul > js/app.js

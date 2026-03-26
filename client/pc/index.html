@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Home</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Header / Navigation -->
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo">🎬 MyStream</h1>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search videos...">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="filter-tags">
+            <span class="tag active" data-filter="all">All</span>
+            <span class="tag" data-filter="mp4">MP4</span>
+            <span class="tag" data-filter="mkv">MKV</span>
+        </div>
+
+        <div id="videoGrid" class="video-grid">
+            <!-- Loading State -->
+            <div class="loader">Loading your library...</div>
+        </div>
+    </main>
+
+    <!-- Fullscreen Player Modal -->
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="video-container">
+                <video id="mainPlayer" controls playsinline autocomplete="off"></video>
+            </div>
+            <h2 id="modalTitle" class="modal-video-title">Video Title</h2>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
