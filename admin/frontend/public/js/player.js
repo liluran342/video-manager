@@ -12,7 +12,7 @@ export function playVideo(id, name, progress) {
     document.getElementById('nowPlayingTitle').innerText = name;
     player.src = '/api/play/' + id;
     
-    // Jump to saved progress when video metadata is loaded
+    // 加载元数据后跳转进度
     player.onloadedmetadata = () => {
         if (progress > 0) player.currentTime = progress;
     };
@@ -20,7 +20,10 @@ export function playVideo(id, name, progress) {
     modal.style.display = 'flex';
     player.play();
 
-    // Auto-save progress every 5 seconds while playing
+    // 播放时每 5 秒自动保存一次进度
+    // 先清除可能存在的旧定时器
+    if (saveProgressInterval) clearInterval(saveProgressInterval);
+    
     saveProgressInterval = setInterval(() => {
         if (!player.paused && currentVideoId) {
             saveProgress(currentVideoId, player.currentTime);
@@ -69,30 +72,43 @@ export function captureCover() {
 // Don't forget to expose it to window in main.js
 
 function saveProgress(id, time) {
+    if (!id) return;
     fetch('/api/progress/' + id, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ progress: time })
-    });
+    }).catch(err => console.error('Save progress failed:', err));
 }
-
+// 在 player.js 的 closePlayer 函数中增加
 export function closePlayer() {
+    const modal = document.getElementById('playerModal');
     const player = document.getElementById('player');
-    
-    // Save final progress before closing
+
+    // --- 修改开始 ---
+    // 1. 在停止播放前，最后保存一次当前进度
     if (currentVideoId && player.currentTime > 0) {
         saveProgress(currentVideoId, player.currentTime);
     }
-    
-    clearInterval(saveProgressInterval);
-    currentVideoId = null;
-    
-    document.getElementById('playerModal').style.display = 'none';
+
+    // 2. 清除定时器
+    if (saveProgressInterval) {
+        clearInterval(saveProgressInterval);
+        saveProgressInterval = null;
+    }
+
+    // 3. 停止播放器
     player.pause();
-    player.src = ''; 
-    
-    // Reload the list so the red progress bar updates visually
-    loadVideos();
+    player.src = "";
+    modal.style.display = 'none';
+
+    // 4. 重置剪辑面板
+    const clipperPanel = document.getElementById('clipperPanel');
+    if (clipperPanel) clipperPanel.style.display = 'none';
+
+    // 5. 关键：刷新视频列表，显示最新的进度条
+    // 这里传入 window.currentFilterSourceId 以保持当前的视图状态（是在看全部还是在看某个视频的片段）
+    loadVideos(window.currentFilterSourceId || null);
+    // --- 修改结束 ---
 }
 
 export function initPlayer() {

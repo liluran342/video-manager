@@ -39,11 +39,13 @@ app.use(express.json());
 const configRoutes = require('./routes/config');
 const videoRoutes = require('./routes/video');
 const downloadRoutes = require('./routes/download');
+const clipperRoutes = require('./routes/clipper');
 
 app.use('/api/config', configRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/download', downloadRoutes);  // 处理 /api/download (POST)
 app.use('/api/downloads', downloadRoutes); // 处理 /api/downloads/status (GET)
+app.use('/api/clipper', clipperRoutes);
 
 // 特殊路由（播放与进度在 video 路由里已处理，注意前缀）
 // 如果你希望保持原样 API，可以这样映射：

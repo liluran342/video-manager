@@ -32,7 +32,7 @@ The content is organized as follows:
 <notes>
 - Some files may have been excluded based on .gitignore rules and Repomix's configuration
 - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
-- Only files matching these patterns are included: public/index.html, public/css/**/*
+- Only files matching these patterns are included: public/index.html, public/js/library.js, public/js/player.js, public/js/main.js
 - Files matching patterns in .gitignore are excluded
 - Files matching default ignore patterns are excluded
 - Files are sorted by Git change count (files with more changes are at the bottom)
@@ -41,263 +41,556 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
-public/css/base.css
-public/css/layout.css
-public/css/player.css
-public/css/sidebar-widgets.css
-public/css/video-grid.css
 public/index.html
+public/js/library.js
+public/js/main.js
+public/js/player.js
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
 
-<file path="public/css/base.css">
-/* base.css */
-body { 
-    margin: 0; 
-    background: #111; 
-    color: #fff; 
-    font-family: Arial, sans-serif; 
+<file path="public/js/library.js">
+// js/library.js (媒体库模块 - 表格版)
+import { formatTime, formatDate } from './utils.js';
+import { playVideo } from './player.js';
+
+// 记录当前查看的状态
+let currentFilterSourceId = null;
+
+/**
+ * @param {string|null} sourceId - 如果传入 ID，则进入“查看特定视频的片段”模式
+ */
+export function loadVideos(sourceId = null) {
+    currentFilterSourceId = sourceId;
+    const list = document.getElementById('list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    // --- 新增：获取 UI 上的过滤器值 ---
+    // 假设你的 HTML 中有一个 <select id="libraryFilter">
+    const filterSelect = document.getElementById('libraryFilter');
+    const filterType = filterSelect ? filterSelect.value : 'all'; // all, originals, clips
+
+    // 1. 构建 API 请求路径
+    let url = '/api/videos';
+    const params = new URLSearchParams();
+
+    if (sourceId) {
+        // 如果是“查看此视频的片段”模式，忽略全局过滤，只传 sourceId
+        params.append('sourceId', sourceId);
+    } else {
+        // 正常模式，传入过滤器参数 (originals, clips, 或 all)
+        if (filterType !== 'all') {
+            params.append('filterType', filterType);
+        }
+    }
+
+    if (params.toString()) {
+        url += `?${params.toString()}`;
+    }
+
+    fetch(url).then(res => res.json()).then(data => {
+        
+        // 2. 如果正在查看某个视频的片段，显示返回行
+        if (sourceId) {
+            const backRow = document.createElement('div');
+            backRow.className = 'video-row back-row';
+            backRow.style.cssText = 'justify-content: center; border: 1px dashed var(--primary-blue); margin-bottom: 10px; background: rgba(52, 152, 219, 0.05);';
+            backRow.innerHTML = `
+                <div style="color: var(--primary-blue); font-weight: bold; cursor: pointer; padding: 10px;">
+                    ⬅️ Back to All Videos (Exit Clip View)
+                </div>
+            `;
+            backRow.onclick = () => loadVideos(null); 
+            list.appendChild(backRow);
+        }
+
+        // 如果数据为空，显示提示
+        if (data.length === 0) {
+            list.innerHTML = `<div style="text-align:center; padding: 40px; color: #666;">No videos found in this category.</div>`;
+            return;
+        }
+
+        data.forEach(v => {
+            const row = document.createElement('div');
+            row.className = 'video-row';
+
+            const bgImage = v.cover ? `url('/covers/${v.cover}')` : 'none';
+            const percent = v.duration > 0 ? Math.min((v.progress / v.duration) * 100, 100) : 0;
+            const rawPath = v.path || v.filepath || '';
+            const safePath = rawPath.replace(/\\/g, '/');
+            const safeName = v.name.replace(/'/g, "\\'");
+            
+            // 3. 准备 UI 徽章
+            // 如果是主视频，且有片段，显示片段计数按钮
+            const clipsBtnHtml = (!sourceId && v.clip_count > 0)
+                ? `<button class="btn-action view-clips-btn" title="View ${v.clip_count} Clips" style="background: #2c3e50; color: #3498db; width: auto; padding: 0 8px; border: 1px solid #3498db;">🎞️ ${v.clip_count}</button>` 
+                : '';
+
+            // 如果视频本身是一个片段，打上红色的 CLIP 标签
+            const sourceTag = v.source_id 
+                ? `<span class="row-badge" style="position:absolute; bottom:2px; right:2px; background:rgba(231, 76, 60, 0.9); border:none; font-size:9px; color:white; padding: 1px 3px;">CLIP</span>` 
+                : '';
+
+            row.innerHTML = `
+                <div class="col-thumb">
+                    <div class="list-thumb" style="background-image: ${bgImage}; position: relative;">
+                        ${sourceTag}
+                    </div>
+                </div>
+                
+                <div class="col-main">
+                    <div class="row-title" title="${v.name}">${v.name}</div>
+                    <div class="progress-bar" style="height: 3px; width: 100px; background: #333; margin-top:5px;">
+                        <div class="progress-fill" style="width: ${percent}%; height: 100%; background: var(--primary-blue);"></div>
+                    </div>
+                </div>
+
+                <div class="col-meta">
+                    <span class="row-badge">${(v.format || '').toUpperCase()}</span>
+                </div>
+
+                <div class="col-meta">
+                    <span class="row-badge" style="color: #2196F3; border-color: rgba(33, 150, 243, 0.3);">${v.resolution || 'N/A'}</span>
+                </div>
+
+                <div class="col-meta">
+                    <span style="font-size: 13px;">${formatTime(v.duration)}</span>
+                </div>
+
+                <div class="col-date" style="font-size: 11px; color: #777;">${formatDate(v.added_at)}</div>
+
+                <div class="col-actions">
+                    ${clipsBtnHtml}
+                    <button class="btn-action clip-btn" title="Clip Video">✂️</button>
+                    <button class="btn-action del-btn" title="Delete Video">🗑️</button>
+                </div>
+            `;
+
+            // 事件绑定
+            row.addEventListener('click', (e) => {
+                if (!e.target.closest('button')) {
+                    playVideo(v.id, v.name, v.progress);
+                }
+            });
+
+            const viewBtn = row.querySelector('.view-clips-btn');
+            if (viewBtn) {
+                viewBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    loadVideos(v.id); 
+                });
+            }
+
+            row.querySelector('.clip-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.prepareClip) window.prepareClip(safePath, v.id, safeName, e);
+            });
+
+            row.querySelector('.del-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (typeof deleteVideo === 'function') {
+                    deleteVideo(v.id, e);
+                } else {
+                    window.deleteVideo(v.id, e);
+                }
+            });
+
+            list.appendChild(row);
+        });
+    });
 }
 
-/* 统一按钮基础样式 */
-button {
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    transition: 0.2s;
+// 如果你在 HTML 里的 select 发生了变化，触发刷新
+// <select id="libraryFilter" onchange="loadVideos()"> ... </select>
+
+/**
+ * 删除视频逻辑 (保持不变，但移除了对 window 的依赖)
+ */
+export function deleteVideo(id, event) {
+    if (event) event.stopPropagation();
+
+    const choice = confirm(
+        "Delete Options:\n\n" +
+        "Click [OK] to delete from Library AND DISK (Permanently).\n" +
+        "Click [Cancel] to keep the file and only remove from Library."
+    );
+
+    let deleteFile = false;
+    if (choice) {
+        deleteFile = true;
+    } else {
+        if (confirm("Do you want to only REMOVE from Library (Keep the file)?")) {
+            deleteFile = false;
+        } else {
+            return; 
+        }
+    }
+
+    fetch(`/api/videos/${id}?deleteFile=${deleteFile}`, {
+        method: 'DELETE',
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(deleteFile ? 'File and record deleted!' : 'Record removed, file kept.');
+            loadVideos(); 
+        }
+    });
 }
+
+/**
+ * 扫描磁盘
+ */
+export function scanLibrary() {
+    fetch('/api/scan', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => { 
+        alert(data.message); 
+        setTimeout(loadVideos, 2000); 
+    });
+}
+
+// 如果其他地方有内联 onclick 调用（如 index.html），需要将函数挂载到 window
+window.scanLibrary = scanLibrary;
+window.deleteVideo = deleteVideo;
+window.loadVideos = loadVideos;
 </file>
 
-<file path="public/css/layout.css">
-/* layout.css */
-.app { 
-    display: flex; 
-    height: 100vh; 
-}
+<file path="public/js/main.js">
+//js/main.js (入口模块)
+import { loadConfig, saveConfig } from './config.js';
+import { loadVideos, deleteVideo, scanLibrary } from './library.js';
 
-.sidebar { 
-    width: 280px; 
-    background: #1a1a1a; 
-    padding: 20px; 
-    border-right: 1px solid #333; 
-    overflow-y: auto; 
-}
+import { playVideo, closePlayer, initPlayer, captureCover } from './player.js';
 
-.main { 
-    flex: 1; 
-    overflow-y: auto; 
-    padding: 30px; 
-    background: #0f0f0f; 
-}
+window.captureCover = captureCover; // Add this line
+// ... other window assignments
+import { addToPlan, startBatch, startDownload, initDownloader } from './downloader.js';
+// 在顶部引入
+import { startClipping, initClipper,prepareClip } from './clipper.js';
 
-.header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 30px; 
-}
 
-.header h1 { margin: 0; font-size: 28px; }
+
+
+// 1. 将内联 HTML (onclick="...") 需要用到的函数挂载到全局对象 window
+window.saveConfig = saveConfig;
+window.deleteVideo = deleteVideo;
+window.scanLibrary = scanLibrary;
+window.addToPlan = addToPlan;
+window.startBatch = startBatch;
+window.closePlayer = closePlayer;
+window.startDownload = startDownload;
+window.captureCover = captureCover; // Add this line
+// 挂载到 window
+window.prepareClip = prepareClip;
+window.startClipping = startClipping;
+window.playVideo = playVideo; 
+
+
+// 2. 页面加载完成后进行初始化
+document.addEventListener('DOMContentLoaded', () => {
+    initPlayer();
+    loadConfig();
+    loadVideos();
+    initClipper();
+    initDownloader();
+});
 </file>
 
-<file path="public/css/player.css">
-/* player.css */
-.player-modal { 
-    position: fixed; 
-    top: 0; left: 0; 
-    width: 100vw; height: 100vh; 
-    background: rgba(0, 0, 0, 0.9); 
-    display: none; 
-    align-items: center; 
-    justify-content: center; 
-    z-index: 1000; 
-    backdrop-filter: blur(5px); 
+<file path="public/js/player.js">
+//js/player.js (播放器模块)
+import { loadVideos } from './library.js';
+
+let currentVideoId = null;
+let saveProgressInterval = null;
+
+export function playVideo(id, name, progress) {
+    currentVideoId = id;
+    const player = document.getElementById('player');
+    const modal = document.getElementById('playerModal');
+    
+    document.getElementById('nowPlayingTitle').innerText = name;
+    player.src = '/api/play/' + id;
+    
+    // Jump to saved progress when video metadata is loaded
+    player.onloadedmetadata = () => {
+        if (progress > 0) player.currentTime = progress;
+    };
+    
+    modal.style.display = 'flex';
+    player.play();
+
+    // Auto-save progress every 5 seconds while playing
+    saveProgressInterval = setInterval(() => {
+        if (!player.paused && currentVideoId) {
+            saveProgress(currentVideoId, player.currentTime);
+        }
+    }, 5000);
 }
-.player-content { 
-    width: 80%; 
-    max-width: 1200px; 
-    background: #000; 
-    border-radius: 8px; 
-    box-shadow: 0 10px 40px rgba(0,0,0,0.8); 
-    display: flex; 
-    flex-direction: column; 
-}
-.player-header { background: #1a1a1a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-.player-title { font-size: 18px; font-weight: bold; color: #fff; }
-.close-btn { color: #aaa; cursor: pointer; font-size: 24px; transition: 0.2s; }
-.close-btn:hover { color: #ff4444; }
-.player-content video { width: 100%; max-height: 80vh; outline: none; }
-</file>
+// public/js/player.js
 
-<file path="public/css/sidebar-widgets.css">
-/* sidebar-widgets.css */
-.sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 22px; }
+// Add captureCover to your exports
+export function captureCover() {
+    if (!currentVideoId) return;
 
-/* 面板与表单 */
-.panel { margin-top: 20px; background: #222; padding: 15px; border-radius: 8px; }
-.panel h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 15px; }
+    const video = document.getElementById('player');
+    const canvas = document.getElementById('captureCanvas');
+    const ctx = canvas.getContext('2d');
 
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; }
-.form-group input { width: 100%; padding: 8px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px; }
+    // 1. Set canvas dimensions to match video aspect ratio (e.g., 640x360 for high quality)
+    canvas.width = 640;
+    canvas.height = 360;
 
-/* 按钮类 */
-.btn-primary { width: 100%; padding: 10px; background: #4CAF50; color: white; }
-.btn-primary:hover { background: #45a049; }
-.btn-scan { background: #2196F3; margin-top: 15px; }
-.btn-scan:hover { background: #1976D2; }
+    // 2. Draw the current frame from the video element to the canvas
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-/* 下载项目 */
-.download-item { background: #333; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
-.dl-title { font-size: 12px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dl-progress-bg { background: #111; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
-.dl-progress-fill { background: #2196F3; height: 100%; width: 0%; transition: width 0.5s linear; }
-.dl-percentage { font-size: 10px; color: #ccc; text-align: right; margin-top: 3px; }
-</file>
+    // 3. Convert canvas to a JPEG blob
+    canvas.toBlob((blob) => {
+        const formData = new FormData();
+        formData.append('cover', blob, 'cover.jpg');
 
-<file path="public/css/video-grid.css">
-/* video-grid.css */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
-
-.card { 
-    cursor: pointer; 
-    transition: 0.2s; 
-    background: #222; 
-    border-radius: 8px; 
-    padding-bottom: 10px; 
-    overflow: hidden; 
-    position: relative; 
-}
-.card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.5); background: #2a2a2a; }
-
-.thumb {
-    height: 140px;
-    background-color: #333;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 8px;
+        // 4. Send to backend
+        fetch(`/api/videos/cover/${currentVideoId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Cover updated successfully!');
+            } else {
+                alert('Failed to update cover: ' + data.error);
+            }
+        })
+        .catch(err => console.error('Error uploading cover:', err));
+    }, 'image/jpeg', 0.8);
 }
 
-/* 卡片内的小组件 */
-.badges-top { display: flex; gap: 5px; }
-.badge { background: rgba(0,0,0,0.8); padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-.format { color: #4CAF50; }
-.res { color: #2196F3; }
-.duration { color: #fff; align-self: flex-end; }
+// Don't forget to expose it to window in main.js
 
-.progress-bar { height: 4px; background: #555; width: 100%; }
-.progress-fill { height: 100%; background: #e50914; width: 0%; }
-
-.title { text-align: center; margin-top: 8px; padding: 0 10px; font-size: 14px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.added-date { text-align: center; font-size: 11px; color: #888; margin-top: 6px; padding-bottom: 5px; }
-
-/* 删除按钮 */
-.delete-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(229, 9, 20, 0.8);
-    color: white;
-    padding: 5px;
-    font-size: 14px;
-    opacity: 0;
-    z-index: 2;
+function saveProgress(id, time) {
+    fetch('/api/progress/' + id, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ progress: time })
+    });
 }
-.card:hover .delete-btn { opacity: 1; }
-.delete-btn:hover { background: rgba(229, 9, 20, 1); }
+
+// 在 player.js 的 closePlayer 函数中增加
+export function closePlayer() {
+    const modal = document.getElementById('playerModal');
+    const player = document.getElementById('player');
+    
+    player.pause();
+    player.src = "";
+    modal.style.display = 'none';
+
+    // 重置：关闭弹窗时隐藏剪辑面板
+    const clipperPanel = document.getElementById('clipperPanel');
+    if (clipperPanel) clipperPanel.style.display = 'none';
+}
+
+export function initPlayer() {
+    document.getElementById('playerModal').addEventListener('click', function(e) {
+        if (e.target === this) closePlayer();
+    });
+}
 </file>
 
 <file path="public/index.html">
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Video Library</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Admin System</title>
     <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/sidebar-widgets.css">
-<link rel="stylesheet" href="css/video-grid.css">
-<link rel="stylesheet" href="css/player.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/sidebar-widgets.css">
+    <link rel="stylesheet" href="css/video-grid.css">
+    <link rel="stylesheet" href="css/player.css">
+     <link rel="stylesheet" href="css/video-table.css">
 </head>
 <body>
 
-<div class="app">
-    <div class="sidebar">
-        <h2>🎬 Video Manager</h2>
-      
-        <!-- Inside <div class="sidebar"> -->
-<div class="panel">
-    <h3>📥 New Task</h3>
-    <div class="form-group"><label>Name</label><input id="dlName"></div>
-    <div class="form-group"><label>URL</label><input id="dlUrl"></div>
-    <div style="display: flex; gap: 5px;">
-        <button class="btn-primary" onclick="startDownload()" style="flex: 1;">Download Now</button>
-        <button class="btn-primary" onclick="addToPlan()" style="flex: 1; background: #2ecc71;">Add to Plan</button>
-    </div>
-</div>
-
-<!-- New Batch Plan Panel -->
-<div class="panel" id="planPanel" style="display: none;">
-    <h3>📋 Download Plan (<span id="planCount">0</span>)</h3>
-    <div id="planList" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
-    <button class="btn-primary" onclick="startBatch()" style="background: #f1c40f; color: #000;">🚀 Start Batch Download</button>
-</div>
-
-<!-- Active Downloads (Existing) -->
-<div class="panel" id="queuePanel" style="display: none;">
-    <h3>🔄 Active Queue</h3>
-    <div id="downloadQueue"></div>
-</div>
-        <div class="panel">
-            <h3>⚙️ Settings</h3>
-            <div class="form-group"><label>Video Storage</label><input id="videoDir"></div>
-            <div class="form-group"><label>Cover Storage</label><input id="coverDir"></div>
-            <div class="form-group"><label>DB Storage</label><input id="dbPath"></div>
-            <button class="btn-primary" onclick="saveConfig()">Save Settings</button>
+<div class="admin-wrapper">
+    <!-- Left Sidebar: Navigation -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">🎬</span>
+            <span class="logo-text">VideoAdmin</span>
         </div>
-        <!-- Active Downloads Panel -->
-        <div class="panel" id="queuePanel" style="display: none;">
-            <h3>🔄 Active Downloads</h3>
+        
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" onclick="showSection('library')">
+                <span class="icon">📁</span> My Library
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('downloader')">
+                <span class="icon">📥</span> Download Center
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('settings')">
+                <span class="icon">⚙️</span> System Settings
+            </a>
+            
+   
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>Server Status: <span class="status-online">Online</span></p>
+        </div>
+    </aside>
+
+    <!-- Right Main Content -->
+    <main class="admin-main">
+        <!-- Top Navbar -->
+      <header class="top-navbar">
+    <h2 id="section-title">My Library</h2>
+    <div class="top-actions" style="display: flex; gap: 15px; align-items: center;">
+        <!-- 新增筛选器 -->
+        <select id="libraryFilter" onchange="loadVideos()" class="admin-select" style="background:#1a1a1a; color:white; border:1px solid #333; padding:5px; border-radius:4px;">
+    <option value="all">📁 All Videos</option>
+    <option value="originals">🎬 Full Videos Only</option>
+    <option value="clips">✂️ Clips Only</option>
+</select>
+  <a href="/" target="_blank" title="Go to Home" class="nav-icon-link">🏠</a>
+        <button class="btn-refresh" onclick="scanLibrary()">🔄 Scan Disk</button>
+    </div>
+</header>
+
+        <!-- Dynamic Content Sections -->
+        <div class="content-body">
+            
+            <!-- Section: Library -->
+            <!-- Section: Library -->
+<section id="section-library" class="admin-section">
+    <div class="admin-card">
+        <!-- 列表头部 (模拟表头) -->
+        <div class="list-header">
+            <div class="col-thumb">Preview</div>
+            <div class="col-main">Video Info</div>
+            <div class="col-meta">Format</div>
+            <div class="col-meta">Resolution</div>
+            <div class="col-meta">Duration</div>
+            <div class="col-date">Added Date</div>
+            <div class="col-actions">Actions</div>
+        </div>
+        
+        <!-- 列表主体 (数据注入区) -->
+        <div id="list" class="list-body">
+            <!-- 动态生成的行将显示在这里 -->
+        </div>
+    </div>
+</section>
+
+            <!-- Section: Downloader -->
+          <!-- 找到 Section: Downloader 部分，修改如下 -->
+<section id="section-downloader" class="admin-section" style="display: none;">
+    <div class="admin-card">
+        <h3>Add New Task</h3>
+        <div class="download-form">
+            <div class="input-row">
+                <input id="dlName" type="text" placeholder="Video Filename">
+                <input id="dlUrl" type="text" placeholder="m3u8 URL">
+            </div>
+            <div class="button-row">
+                <button class="btn-primary" onclick="startDownload()">Download Now</button>
+                <button class="btn-secondary" onclick="addToPlan()">+ Add to Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="queue-container">
+        <!-- 修改点：给这个 column 加上 id="planPanel" 方便显示隐藏 -->
+        <div class="queue-column" id="planPanel" style="display: none;">
+            <h3>📋 Planned Tasks (<span id="planCount">0</span>)</h3> <!-- 修改点：加上 planCount -->
+            <div id="planList" class="plan-list"></div>
+            <button id="btnStartBatch" class="btn-batch" onclick="startBatch()">🚀 Execute Plan</button>
+        </div>
+        <div class="queue-column" id="queuePanel"> <!-- 确保有 queuePanel -->
+            <h3>🔄 Progress</h3>
             <div id="downloadQueue"></div>
         </div>
     </div>
-    <div class="main">
-        <div class="header">
-            <h1>My Library</h1>
-            <button class="btn-primary btn-scan" style="width: auto; padding: 10px 20px;" onclick="scanLibrary()">🔄 Scan Library</button>
+</section>
+
+
+            <!-- Section: Settings -->
+            <section id="section-settings" class="admin-section" style="display: none;">
+                <div class="admin-card">
+                    <h3>Storage Configuration</h3>
+                    <div class="form-group"><label>Video Directory</label><input id="videoDir"></div>
+                    <div class="form-group"><label>Cover Directory</label><input id="coverDir"></div>
+                    <div class="form-group"><label>Database Path</label><input id="dbPath"></div>
+                    <button class="btn-primary" onclick="saveConfig()">Save Settings</button>
+                </div>
+            </section>
+
         </div>
-        <div class="grid" id="list"></div>
-    </div>
+    </main>
 </div>
-<div id="playerModal" class="player-modal"> <!-- Check this ID -->
+
+<!-- Player Modal (Same as before) -->
+<!-- 修改后的 Player Modal -->
+<div id="playerModal" class="player-modal">
     <div class="player-content">
         <div class="player-header">
             <span id="nowPlayingTitle" class="player-title">Loading...</span>
-            <div class="player-controls">
-                <!-- Our new button -->
-                <button class="btn-capture" onclick="captureCover()">📸 Capture Cover</button>
-                <span class="close-btn" onclick="closePlayer()">✖</span>
+            <span class="close-btn" onclick="closePlayer()">✖</span>
+        </div>
+        
+        <div class="player-main-layout">
+            <!-- 左侧：视频播放 -->
+            <div class="video-section">
+                <video id="player" controls></video>
+            </div>
+
+            <!-- 右侧：剪辑控制面板 (默认隐藏，仅点击剪辑按钮时显示) -->
+            <div id="clipperPanel" class="clipper-side-panel" style="display: none;">
+                <div class="panel-header">✂️ Quick Clip</div>
+                
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <div class="input-with-btn">
+                        <input id="clipStart" type="text" placeholder="00:00:00">
+                        <button onclick="window.pickTime('start')">🚩 Set</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>End Time</label>
+                    <div class="input-with-btn">
+                        <input id="clipEnd" type="text" placeholder="00:00:00">
+                        <button onclick="window.pickTime('end')">🏁 Set</button>
+                    </div>
+                </div>
+
+                <!-- 隐藏的路径字段 -->
+                <input id="clipVideoPath" type="hidden">
+
+                <button class="btn-primary" style="width: 100%; margin-top: 15px;" onclick="startClipping()">
+                    🚀 Create Clip
+                </button>
+
+                <div id="clipperStatus" style="margin-top: 15px; font-size: 12px;"></div>
             </div>
         </div>
-        <video id="player" controls></video>
-        <!-- Added canvas for capture -->
-        <canvas id="captureCanvas" style="display: none;"></canvas>
     </div>
 </div>
 
-<!-- 其他 HTML 内容... -->
-
-<!-- 引入入口脚本，浏览器会自动按需加载其他互相依赖的模块 -->
 <script type="module" src="./js/main.js"></script>
-
-</body>
-</html>
+<script>
+    // Simple UI switch logic
+    function showSection(sectionId) {
+        document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        
+        document.getElementById('section-' + sectionId).style.display = 'block';
+        event.currentTarget.classList.add('active');
+        document.getElementById('section-title').innerText = event.currentTarget.innerText.trim();
+    }
+</script>
 </body>
 </html>
 </file>

@@ -64,30 +64,50 @@ function processQueue() {
         }
     });
 
- downloader.on('close', code => {
+// backend/services/downloadService.js
+
+downloader.on('close', code => {
     activeDownloads--;
 
     if (downloadStatus[url]) {
         if (code === 0) {
-            // SUCCESS CASE
+            // ✅ 成功情况
             downloadStatus[url].status = 'completed';
             downloadStatus[url].progress = 100;
+            
             try {
-                // Update the status to 'completed' so it's blocked from being added again
+                // 1. 更新下载历史状态
                 db.prepare('UPDATE download_history SET status = ?, added_at = ? WHERE url = ?')
                   .run('completed', Date.now(), url);
+
+                // 2. 关键修改：将下载好的视频插入到 videos 表，这样 Library 才能搜到
+                // 构造文件的绝对路径 (N_m3u8DL-RE 默认输出 .mp4)
+                const finalFilePath = path.join(saveDir, `${name}.mp4`); 
+                const videoId = Date.now().toString(); // 生成一个临时 ID
+
+                db.prepare(`
+                    INSERT OR REPLACE INTO videos (id, name, format, filepath, added_at, resolution, progress) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                `).run(
+                    videoId, 
+                    name, 
+                    'mp4', 
+                    finalFilePath, 
+                    Date.now(), 
+                    'Pending', // 分辨率等扫描脚本后续更新
+                    0          // 初始播放进度为 0
+                );
+                
+                console.log(`[Success] Video added to library: ${name}`);
             } catch (e) { 
-                console.error('DB Update Error (Success):', e); 
+                console.error('DB Insert/Update Error (Success):', e); 
             }
         } else {
-            // FAILURE CASE
+            // ❌ 失败情况
             downloadStatus[url].status = 'failed';
-            // Save logs as error message for the frontend to display
             downloadStatus[url].errorMsg = downloadStatus[url].logs.join('\n');
             
             try {
-                // Update the status to 'failed'. 
-                // This allows the user to try downloading this URL again later.
                 db.prepare('UPDATE download_history SET status = ? WHERE url = ?')
                   .run('failed', url);
             } catch (e) { 
@@ -96,12 +116,12 @@ function processQueue() {
         }
     }
 
-    // 1. Remove from memory after 1 minute so frontend alerts stop
+    // 1分钟后清理内存
     setTimeout(() => { 
         if (downloadStatus[url]) delete downloadStatus[url]; 
     }, 60000);
     
-    // 2. CRITICAL: Trigger the next item in the queue
+    // 处理下一个队列
     processQueue();
 });
 }

@@ -21,7 +21,8 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS download_history (
         url TEXT PRIMARY KEY,
         name TEXT,
-        status TEXT DEFAULT 'downloading', -- Added: downloading, completed, failed
+        status TEXT DEFAULT 'downloading', -- downloading, completed, failed
+        error_msg TEXT,                  -- 新增：存储失败原因
         added_at INTEGER
     );
 `);
@@ -31,5 +32,7 @@ try { db.exec("ALTER TABLE videos ADD COLUMN resolution TEXT DEFAULT 'Unknown'")
 try { db.exec("ALTER TABLE videos ADD COLUMN progress REAL DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE videos ADD COLUMN added_at INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE download_history ADD COLUMN status TEXT DEFAULT 'completed'"); } catch (e) {}
+// 迁移脚本：增加 source_id 字段，记录它是从哪个视频剪出来的
+try { db.exec("ALTER TABLE videos ADD COLUMN source_id TEXT"); } catch (e) {}
 
 module.exports = db;

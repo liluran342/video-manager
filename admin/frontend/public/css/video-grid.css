@@ -50,3 +50,59 @@
 }
 .card:hover .delete-btn { opacity: 1; }
 .delete-btn:hover { background: rgba(229, 9, 20, 1); }
+/* 剪辑按钮样式 */
+.card .clip-btn {
+    position: absolute;
+    top: 5px;
+    left: 5px; /* 放在左上角，与右侧的删除按钮对称 */
+    z-index: 10;
+    background: rgba(52, 152, 219, 0.9); /* 蓝色背景 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    opacity: 0; /* 默认隐藏 */
+    transition: opacity 0.2s, background 0.2s;
+}
+
+/* 鼠标悬停在卡片上时显示按钮 */
+.card:hover .clip-btn {
+    opacity: 1;
+}
+
+.card .clip-btn:hover {
+    background: #2980b9;
+}
+
+/* 调整删除按钮，确保它们不会重叠（如果之前是在左边的话） */
+.card .delete-btn {
+    right: 5px;
+    left: auto;
+}
+/* 返回按钮行 */
+.back-row {
+    background: rgba(52, 152, 219, 0.1);
+    border: 1px dashed var(--primary-blue);
+    margin: 10px 0;
+    justify-content: center;
+    border-radius: 8px;
+}
+.back-row:hover {
+    background: rgba(52, 152, 219, 0.2);
+}
+
+/* 片段按钮样式 */
+.view-clips-btn {
+    background: #2c3e50 !important;
+    border: 1px solid #34495e;
+    color: #ecf0f1 !important;
+    font-size: 11px !important;
+    width: auto !important;
+    padding: 0 8px !important;
+}
+
+.view-clips-btn:hover {
+    background: #34495e !important;
+    border-color: var(--primary-blue);
+}

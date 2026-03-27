@@ -8,10 +8,10 @@ const IGNORE_DIRS = new Set([
   '.cache',
   'dist',
   'build',
-  'covers',
+  
   'Logs',
-  'downloads',
-  'videos'
+ 
+ 
 
 
 ]);

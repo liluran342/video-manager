@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/sidebar-widgets.css">
     <link rel="stylesheet" href="css/video-grid.css">
     <link rel="stylesheet" href="css/player.css">
+     <link rel="stylesheet" href="css/video-table.css">
 </head>
 <body>
 
@@ -30,10 +31,8 @@
             <a href="#" class="nav-item" onclick="showSection('settings')">
                 <span class="icon">⚙️</span> System Settings
             </a>
-            <!-- Future links go here -->
-            <a href="#" class="nav-item disabled">
-                <span class="icon">📊</span> Statistics (Soon)
-            </a>
+            
+   
         </nav>
 
         <div class="sidebar-footer">
@@ -44,51 +43,76 @@
     <!-- Right Main Content -->
     <main class="admin-main">
         <!-- Top Navbar -->
-        <header class="top-navbar">
-            <h2 id="section-title">My Library</h2>
-            <div class="top-actions">
-                <button class="btn-refresh" onclick="scanLibrary()">🔄 Scan Disk</button>
-            </div>
-        </header>
+      <header class="top-navbar">
+    <h2 id="section-title">My Library</h2>
+    <div class="top-actions" style="display: flex; gap: 15px; align-items: center;">
+        <!-- 新增筛选器 -->
+        <select id="libraryFilter" onchange="loadVideos()" class="admin-select" style="background:#1a1a1a; color:white; border:1px solid #333; padding:5px; border-radius:4px;">
+    <option value="all">📁 All Videos</option>
+    <option value="originals">🎬 Full Videos Only</option>
+    <option value="clips">✂️ Clips Only</option>
+</select>
+  <a href="/" target="_blank" title="Go to Home" class="nav-icon-link">🏠</a>
+        <button class="btn-refresh" onclick="scanLibrary()">🔄 Scan Disk</button>
+    </div>
+</header>
 
         <!-- Dynamic Content Sections -->
         <div class="content-body">
             
             <!-- Section: Library -->
-            <section id="section-library" class="admin-section">
-                <div class="grid" id="list">
-                    <!-- Cards will be injected here -->
-                </div>
-            </section>
+            <!-- Section: Library -->
+<section id="section-library" class="admin-section">
+    <div class="admin-card">
+        <!-- 列表头部 (模拟表头) -->
+        <div class="list-header">
+            <div class="col-thumb">Preview</div>
+            <div class="col-main">Video Info</div>
+            <div class="col-meta">Format</div>
+            <div class="col-meta">Resolution</div>
+            <div class="col-meta">Duration</div>
+            <div class="col-date">Added Date</div>
+            <div class="col-actions">Actions</div>
+        </div>
+        
+        <!-- 列表主体 (数据注入区) -->
+        <div id="list" class="list-body">
+            <!-- 动态生成的行将显示在这里 -->
+        </div>
+    </div>
+</section>
 
             <!-- Section: Downloader -->
-            <section id="section-downloader" class="admin-section" style="display: none;">
-                <div class="admin-card">
-                    <h3>Add New Task</h3>
-                    <div class="download-form">
-                        <div class="input-row">
-                            <input id="dlName" type="text" placeholder="Video Filename">
-                            <input id="dlUrl" type="text" placeholder="m3u8 URL">
-                        </div>
-                        <div class="button-row">
-                            <button class="btn-primary" onclick="startDownload()">Download Now</button>
-                            <button class="btn-secondary" onclick="addToPlan()">+ Add to Plan</button>
-                        </div>
-                    </div>
-                </div>
+          <!-- 找到 Section: Downloader 部分，修改如下 -->
+<section id="section-downloader" class="admin-section" style="display: none;">
+    <div class="admin-card">
+        <h3>Add New Task</h3>
+        <div class="download-form">
+            <div class="input-row">
+                <input id="dlName" type="text" placeholder="Video Filename">
+                <input id="dlUrl" type="text" placeholder="m3u8 URL">
+            </div>
+            <div class="button-row">
+                <button class="btn-primary" onclick="startDownload()">Download Now</button>
+                <button class="btn-secondary" onclick="addToPlan()">+ Add to Plan</button>
+            </div>
+        </div>
+    </div>
 
-                <div class="queue-container">
-                    <div class="queue-column">
-                        <h3>📋 Planned Tasks</h3>
-                        <div id="planList" class="plan-list"></div>
-                        <button id="btnStartBatch" class="btn-batch" onclick="startBatch()">🚀 Execute Plan</button>
-                    </div>
-                    <div class="queue-column">
-                        <h3>🔄 Progress</h3>
-                        <div id="downloadQueue"></div>
-                    </div>
-                </div>
-            </section>
+    <div class="queue-container">
+        <!-- 修改点：给这个 column 加上 id="planPanel" 方便显示隐藏 -->
+        <div class="queue-column" id="planPanel" style="display: none;">
+            <h3>📋 Planned Tasks (<span id="planCount">0</span>)</h3> <!-- 修改点：加上 planCount -->
+            <div id="planList" class="plan-list"></div>
+            <button id="btnStartBatch" class="btn-batch" onclick="startBatch()">🚀 Execute Plan</button>
+        </div>
+        <div class="queue-column" id="queuePanel"> <!-- 确保有 queuePanel -->
+            <h3>🔄 Progress</h3>
+            <div id="downloadQueue"></div>
+        </div>
+    </div>
+</section>
+
 
             <!-- Section: Settings -->
             <section id="section-settings" class="admin-section" style="display: none;">
@@ -106,17 +130,50 @@
 </div>
 
 <!-- Player Modal (Same as before) -->
+<!-- 修改后的 Player Modal -->
 <div id="playerModal" class="player-modal">
     <div class="player-content">
         <div class="player-header">
             <span id="nowPlayingTitle" class="player-title">Loading...</span>
-            <div class="player-controls">
-                <button class="btn-capture" onclick="captureCover()">📸 Capture</button>
-                <span class="close-btn" onclick="closePlayer()">✖</span>
+            <span class="close-btn" onclick="closePlayer()">✖</span>
+        </div>
+        
+        <div class="player-main-layout">
+            <!-- 左侧：视频播放 -->
+            <div class="video-section">
+                <video id="player" controls></video>
+            </div>
+
+            <!-- 右侧：剪辑控制面板 (默认隐藏，仅点击剪辑按钮时显示) -->
+            <div id="clipperPanel" class="clipper-side-panel" style="display: none;">
+                <div class="panel-header">✂️ Quick Clip</div>
+                
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <div class="input-with-btn">
+                        <input id="clipStart" type="text" placeholder="00:00:00">
+                        <button onclick="window.pickTime('start')">🚩 Set</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>End Time</label>
+                    <div class="input-with-btn">
+                        <input id="clipEnd" type="text" placeholder="00:00:00">
+                        <button onclick="window.pickTime('end')">🏁 Set</button>
+                    </div>
+                </div>
+
+                <!-- 隐藏的路径字段 -->
+                <input id="clipVideoPath" type="hidden">
+
+                <button class="btn-primary" style="width: 100%; margin-top: 15px;" onclick="startClipping()">
+                    🚀 Create Clip
+                </button>
+
+                <div id="clipperStatus" style="margin-top: 15px; font-size: 12px;"></div>
             </div>
         </div>
-        <video id="player" controls></video>
-        <canvas id="captureCanvas" style="display: none;"></canvas>
     </div>
 </div>
 
