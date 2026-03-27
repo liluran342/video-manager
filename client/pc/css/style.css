@@ -6,7 +6,7 @@
     --card-bg: #1e1e1e;
     --text-main: #ffffff;
     --text-dim: #aaaaaa;
-    --accent: #ff0000;
+    --accent: #3498db; /* 修改为蓝色，更符合记录功能色调 */
     --header-height: 60px;
     --z-modal: 1000;
     --z-fullscreen: 2147483647;
@@ -29,7 +29,7 @@ body {
 }
 
 /* ==========================================
-   2. NAVBAR
+   2. NAVBAR & SEARCH (保持不变)
    ========================================== */
 .navbar {
     height: var(--header-height);
@@ -42,31 +42,16 @@ body {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid #222;
 }
-
-.navbar .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.logo { font-size: 22px; font-weight: bold; color: var(--accent); margin: 0; }
-
+.navbar .container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.logo { font-size: 22px; font-weight: bold; color: #ff0000; margin: 0; }
 .search-bar input {
-    background: #222;
-    border: 1px solid #333;
-    color: white;
-    padding: 10px 18px;
-    border-radius: 20px;
-    width: 300px;
-    outline: none;
-    transition: 0.3s;
+    background: #222; border: 1px solid #333; color: white;
+    padding: 10px 18px; border-radius: 20px; width: 300px; outline: none; transition: 0.3s;
 }
-
 .search-bar input:focus { border-color: #555; width: 350px; }
 
 /* ==========================================
-   3. VIDEO GRID & CARDS
+   3. VIDEO GRID & CARDS (保持不变)
    ========================================== */
 .video-grid {
     display: grid;
@@ -74,197 +59,211 @@ body {
     gap: 25px;
     padding: 30px 0;
 }
-
 .video-card {
-    cursor: pointer;
-    background: var(--card-bg);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer; background: var(--card-bg); border-radius: 12px;
+    overflow: hidden; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-
 .video-card:hover { transform: scale(1.04); }
-
-.thumbnail-wrapper {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    background: #222;
-    position: relative;
-}
-
+.thumbnail-wrapper { width: 100%; aspect-ratio: 16 / 9; background: #222; position: relative; }
 .thumbnail-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-
 .duration-tag {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.85);
-    padding: 3px 6px;
-    font-size: 11px;
-    border-radius: 4px;
-    font-weight: bold;
+    position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.85);
+    padding: 3px 6px; font-size: 11px; border-radius: 4px; font-weight: bold;
 }
-
 .video-info { padding: 12px; }
-
-.video-info h3 {
-    margin: 0;
-    font-size: 15px;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    color: #eee;
-}
-
-.video-meta {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-top: 8px;
-    display: flex;
-    gap: 10px;
-}
+.video-info h3 { margin: 0; font-size: 15px; color: #eee; }
+.video-meta { font-size: 12px; color: var(--text-dim); margin-top: 8px; display: flex; gap: 10px; }
 
 /* ==========================================
-   4. MODAL & PLAYER
+   4. MODAL & PLAYER LAYOUT
    ========================================== */
 .modal {
-    display: none; /* 默认隐藏 */
-    position: fixed;
-    top: 0; 
-    left: 0; 
-    width: 100vw; 
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.9); 
-    z-index: var(--z-modal);
-    backdrop-filter: blur(8px);
+    display: none; position: fixed; top: 0; left: 0; 
+    width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); 
+    z-index: var(--z-modal); backdrop-filter: blur(8px);
 }
-.modal.active {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-}
-.modal[style*="display: block"] {
-    display: flex !important; 
-}
+.modal.active { display: flex !important; align-items: center; justify-content: center; }
 
 .modal-content {
-    width: 90%;
-    max-width: 1100px;
-    max-height: 95vh; /* Prevents the player from being taller than the screen */
-    background: #000;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    /* Remove any margins as Flexbox handles it now */
-    margin: 0; 
+    width: 95%; max-width: 1300px; max-height: 95vh;
+    background: #111; border-radius: 12px; overflow: hidden;
+    position: relative; display: flex; flex-direction: column;
 }
 
+/* 播放器与侧边栏布局 */
+.player-layout {
+    display: flex;
+    flex-direction: row; /* 横向布局 */
+    height: calc(95vh - 50px); /* 减去标题栏高度 */
+}
 
-.player-header {
+.player-main {
+    flex: 3; /* 视频占据大头 */
+    display: flex;
+    flex-direction: column;
+    background: #000;
+}
+
+.video-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+video { width: 100%; max-height: 100%; outline: none; }
+
+/* 侧边栏样式 */
+.player-sidebar {
+    flex: 1;
+    min-width: 300px;
+    background: #181818;
+    border-left: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+}
+
+/* 侧边栏头部 - 包含标题和开关 */
+.sidebar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
-    background: #181818;
-    border-bottom: 1px solid #222;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #333;
+    margin-bottom: 15px;
 }
-.modal-video-title {
+
+.sidebar-header h3 {
     margin: 0;
     font-size: 16px;
-    font-weight: 500;
     color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 70%;
 }
-.video-container {
-    width: 100%;
-    flex: 1; /* Allow container to grow */
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
-video {
-    width: 100%;
-    max-height: 80vh; /* Limits video height on large monitors */
-    display: block;
-    outline: none;
-}
-
-.close-modal {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    text-align: center;
-    font-size: 30px;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 50%;
-    z-index: 10; /* 确保在视频上方 */
-    transition: 0.2s;
-}
-
-.close-modal:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
 
 /* ==========================================
-   5. MOBILE & FULLSCREEN ADAPTATION
+   5. AUTO-RECORD TOGGLE (开关按钮样式)
    ========================================== */
-
-/* Fullscreen Mode Fixes */
-#videoModal:fullscreen .modal-content {
-    width: 100vw; height: 100vh;
-    max-width: none; border-radius: 0; margin: 0;
+.record-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-#videoModal:fullscreen .player-header {
+.toggle-label {
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 20px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
     position: absolute;
-    top: 0; left: 0; width: 100%;
-    z-index: var(--z-fullscreen);
-    background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #444;
+    transition: .3s;
+    border-radius: 20px;
 }
 
-/* Small Screens (Mobile Portrait) */
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px; width: 14px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--accent); }
+input:checked + .slider:before { transform: translateX(14px); }
+
+/* ==========================================
+   6. SEGMENT LIST (片段列表项)
+   ========================================== */
+.segment-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.segment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #222;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    transition: 0.2s;
+    border: 1px solid transparent;
+}
+
+.segment-item:hover {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+.segment-info {
+    color: #ddd;
+    font-size: 13px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.delete-segment {
+    color: #666;
+    font-size: 18px;
+    padding: 0 5px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.delete-segment:hover { color: #ff4d4d; }
+
+/* ==========================================
+   7. MODAL UI ELEMENTS
+   ========================================= */
+.close-modal {
+    position: absolute; top: 15px; right: 20px;
+    width: 36px; height: 36px; line-height: 36px;
+    text-align: center; font-size: 24px; color: #fff;
+    cursor: pointer; border-radius: 50%; background: rgba(0,0,0,0.5);
+    z-index: 10; transition: 0.2s;
+}
+.close-modal:hover { background: rgba(255,255,255,0.1); color: #ff4d4d; }
+
+.modal-video-title {
+    padding: 15px 20px;
+    font-size: 16px;
+    background: #181818;
+    color: #fff;
+    border-bottom: 1px solid #222;
+}
+
+/* ==========================================
+   8. RESPONSIVE (移动端适配)
+   ========================================== */
+@media (max-width: 900px) {
+    .player-layout {
+        flex-direction: column; /* 屏幕窄时，侧边栏放到视频下方 */
+        overflow-y: auto;
+    }
+    .player-sidebar {
+        border-left: none;
+        border-top: 1px solid #222;
+        min-height: 300px;
+    }
+}
+
 @media (max-width: 480px) {
-    .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 12px;
-        padding: 15px 10px;
-    }
-    .search-bar { display: none; }
-    .logo { font-size: 18px; }
-    
-    .modal-content { width: 100%; height: 100%; border-radius: 0; display: flex; flex-direction: column; justify-content: center; }
-    .modal-video-title { font-size: 14px; }
-    .close-modal { background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
-}
-
-/* Tablet & Smaller PC */
-@media (max-width: 768px) {
-    .modal-content { width: 100%; }
-}
-
-/* Mobile Landscape Fixes (When held sideways) */
-@media (max-height: 500px) and (orientation: landscape) {
-    .modal-content { width: 100%; height: 100vh; border-radius: 0; }
-    .video-container { height: 100%; display: flex; align-items: center; }
-    video { height: 100vh; max-height: 100vh; object-fit: contain; }
-    
-    .player-header {
-        position: absolute;
-        top: 0; width: 100%;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-        z-index: 10;
-    }
+    .video-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .modal-content { width: 100%; height: 100%; border-radius: 0; }
 }

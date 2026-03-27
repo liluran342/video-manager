@@ -45,15 +45,34 @@
     </main>
 
     <!-- Fullscreen Player Modal -->
-   <div id="videoModal" class="modal">
+ <div id="videoModal" class="modal">
     <div class="modal-content">
-        <!-- 关闭按钮建议放在这里 -->
         <span class="close-modal">&times;</span>
-        <div class="video-container">
-            <video id="mainPlayer" controls playsinline></video>
+        
+        <div class="player-layout">
+            <!-- 左侧：播放器和热力图 -->
+            <div class="player-main">
+                <div class="video-container">
+                    <video id="mainPlayer" controls playsinline></video>
+                  
+                </div>
+                <h2 id="modalTitle" class="modal-video-title">Video Title</h2>
+            </div>
+
+            <!-- 右侧：片段列表 -->
+            <div class="player-sidebar">
+                <h3>🎬 观看片段</h3>
+                 <div class="record-toggle-container">
+            <span class="toggle-label">自动记录</span>
+            <label class="switch">
+                <input type="checkbox" id="autoRecordToggle" checked>
+                <span class="slider round"></span>
+            </label>
         </div>
-        <div class="player-header"> <!-- 建议把标题放在底部或者顶部条里 -->
-            <h2 id="modalTitle" class="modal-video-title">Video Title</h2>
+                <div id="segmentList" class="segment-list">
+                    <!-- 片段项会动态插入到这里 -->
+                </div>
+            </div>
         </div>
     </div>
 </div>

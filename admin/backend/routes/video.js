@@ -144,5 +144,52 @@ router.delete('/:id', (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to delete' });
     }
 });
+// POST /api/videos/history - 记录观看片段
+router.post('/history', express.json(), (req, res) => {
+    const { videoId, startTime, endTime } = req.body;
+    
+    // 过滤掉太短的片段（比如小于 0.5 秒），防止脏数据
+    if (Math.abs(endTime - startTime) < 0.5) {
+        return res.json({ success: true, message: 'Segment too short, ignored.' });
+    }
 
+    try {
+        const stmt = db.prepare(`
+            INSERT INTO watch_segments (video_id, start_time, end_time, watched_at)
+            VALUES (?, ?, ?, ?)
+        `);
+        stmt.run(videoId, startTime, endTime, Date.now());
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Save history error:', err);
+        res.status(500).json({ success: false });
+    }
+});
+
+// GET /api/videos/history/:id - 获取某个视频的所有观看历史（可选）
+// 获取某个视频的所有观看片段，用于生成热力图
+router.get('/history/:id', (req, res) => {
+    try {
+        // 关键点：添加了 id 字段，这样前端才能根据 id 删除
+        const history = db.prepare(`
+            SELECT id, start_time, end_time 
+            FROM watch_segments 
+            WHERE video_id = ?
+            ORDER BY start_time ASC
+        `).all(req.params.id);
+        res.json(history);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+// 删除指定的观看片段
+router.delete('/history/:segmentId', (req, res) => {
+    const { segmentId } = req.params;
+    try {
+        db.prepare('DELETE FROM watch_segments WHERE id = ?').run(segmentId);
+        res.json({ success: true, message: 'Segment deleted' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 module.exports = router;

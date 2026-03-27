@@ -26,7 +26,19 @@ db.exec(`
         added_at INTEGER
     );
 `);
-
+// 在 database.js 的 db.exec 中添加：
+db.exec(`
+    CREATE TABLE IF NOT EXISTS watch_segments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id TEXT,
+        start_time REAL,
+        end_time REAL,
+        watched_at INTEGER,
+        FOREIGN KEY (video_id) REFERENCES videos(id)
+    );
+    -- 添加索引：大幅提升查询特定视频片段的速度
+    CREATE INDEX IF NOT EXISTS idx_segments_video_id ON watch_segments(video_id);
+`);
 // 迁移脚本
 try { db.exec("ALTER TABLE videos ADD COLUMN resolution TEXT DEFAULT 'Unknown'"); } catch (e) {}
 try { db.exec("ALTER TABLE videos ADD COLUMN progress REAL DEFAULT 0"); } catch (e) {}
