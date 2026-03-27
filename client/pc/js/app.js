@@ -40,20 +40,18 @@ async function openPlayer(id, name) {
 
     title.innerText = name;
     player.src = `/api/play/${id}`;
-    modal.style.display = 'block';
     
-    // 1. Start Playback
+    // 使用 classList 激活显示
+    modal.classList.add('active');
+    
     try {
         await player.play();
-        
-        // 2. Check if device is mobile
         const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
-        
         if (isMobile) {
             handleMobileRotation(player);
         }
     } catch (err) {
-        console.error("Playback failed", err);
+        console.error("播放失败:", err);
     }
 }
 // client/pc/js/app.js
@@ -86,24 +84,20 @@ function setupEventListeners() {
     const player = document.getElementById('mainPlayer');
 
     closeBtn.onclick = () => {
-        // 1. Exit Fullscreen if active
         if (document.fullscreenElement) {
             document.exitFullscreen().catch(err => {});
         }
         
-        // 2. Unlock orientation
-        if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock();
-        }
-
-        modal.style.display = 'none';
+        // 移除 active 类隐藏模态框
+        modal.classList.remove('active');
+        
         player.pause();
-        player.src = "";
+        player.src = ""; // 清空流，停止下载
     };
     
-    // Also exit if the video ends
-    player.onended = () => {
-        if (document.fullscreenElement) document.exitFullscreen();
+    // 点击背景也可以关闭（可选增强体验）
+    modal.onclick = (e) => {
+        if (e.target === modal) closeBtn.onclick();
     };
 }
 function formatTime(seconds) {

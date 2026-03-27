@@ -130,7 +130,7 @@ body {
    4. MODAL & PLAYER
    ========================================== */
 .modal {
-    display: none; /* Controlled by JS */
+    display: none; /* 默认隐藏 */
     position: fixed;
     top: 0; 
     left: 0; 
@@ -139,11 +139,11 @@ body {
     background: rgba(0, 0, 0, 0.9); 
     z-index: var(--z-modal);
     backdrop-filter: blur(8px);
-    
-    /* These two lines ensure perfect centering on PC */
-    display: flex;           
-    align-items: center;     /* Vertical center */
-    justify-content: center;  /* Horizontal center */
+}
+.modal.active {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 }
 .modal[style*="display: block"] {
     display: flex !important; 
@@ -201,14 +201,18 @@ video {
 }
 
 .close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
     width: 40px;
     height: 40px;
     line-height: 40px;
     text-align: center;
-    font-size: 24px;
+    font-size: 30px;
     color: #fff;
     cursor: pointer;
     border-radius: 50%;
+    z-index: 10; /* 确保在视频上方 */
     transition: 0.2s;
 }
 

@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <script>
+      (function() {
+            var ua = navigator.userAgent;
+            var isMobile = /Mobi|Android|iPhone|iPad/i.test(ua);
+            // 如果是移动设备，且当前不在 /mobile 路径下，则跳转
+            if (isMobile && !window.location.pathname.startsWith('/mobile')) {
+                window.location.href = '/mobile/index.html';
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Home</title>
     <link rel="stylesheet" href="css/style.css">
+    
 </head>
 <body>
 
@@ -33,15 +45,18 @@
     </main>
 
     <!-- Fullscreen Player Modal -->
-    <div id="videoModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div class="video-container">
-                <video id="mainPlayer" controls playsinline autocomplete="off"></video>
-            </div>
+   <div id="videoModal" class="modal">
+    <div class="modal-content">
+        <!-- 关闭按钮建议放在这里 -->
+        <span class="close-modal">&times;</span>
+        <div class="video-container">
+            <video id="mainPlayer" controls playsinline></video>
+        </div>
+        <div class="player-header"> <!-- 建议把标题放在底部或者顶部条里 -->
             <h2 id="modalTitle" class="modal-video-title">Video Title</h2>
         </div>
     </div>
+</div>
 
     <script src="js/app.js"></script>
 </body>

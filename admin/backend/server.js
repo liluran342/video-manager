@@ -27,6 +27,7 @@ ensureDir(config.videoDir);
 ensureDir(config.coverDir);
 
 app.use(express.static(path.join(__dirname, '../../client/pc')));
+app.use('/mobile', express.static(path.join(__dirname, '../../client/mobile')));
 
 // 2. 将后台管理系统挂载到 /admin (http://localhost:3000/admin)
 app.use('/admin', express.static(path.join(__dirname, '../frontend/public')));

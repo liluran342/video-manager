@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MyStream Mobile</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入图标库 -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 顶部搜索 -->
+    <header class="top-bar">
+        <div class="logo">🎬 MyStream</div>
+        <i class="ri-search-line search-icon"></i>
+    </header>
+
+    <!-- 分类滑动条 -->
+    <nav class="chip-bar">
+        <div class="chip active">全部</div>
+        <div class="chip">电影</div>
+        <div class="chip">番剧</div>
+        <div class="chip">最近添加</div>
+    </nav>
+
+    <!-- 视频流容器 -->
+    <main id="videoList" class="video-feed">
+        <!-- 骨架屏加载状态 -->
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+    </main>
+
+    <!-- 底部导航栏 (手机端核心) -->
+    <footer class="bottom-nav">
+        <div class="nav-item active">
+            <i class="ri-home-5-line"></i>
+            <span>首页</span>
+        </div>
+        <div class="nav-item">
+            <i class="ri-compass-3-line"></i>
+            <span>发现</span>
+        </div>
+        <div class="nav-item">
+            <i class="ri-folder-video-line"></i>
+            <span>库</span>
+        </div>
+    </footer>
+
+    <!-- 手机全屏播放器层 -->
+    <div id="playerOverlay" class="player-overlay">
+        <div class="player-header">
+            <i class="ri-arrow-left-s-line close-player"></i>
+            <span id="videoTitle" class="video-title">正在播放</span>
+        </div>
+        <div class="video-wrapper">
+            <video id="mobilePlayer" playsinline controls></video>
+        </div>
+        <div class="video-details">
+            <h2 id="videoName">视频名称</h2>
+            <p id="videoMeta">分辨率: 1080P • 格式: MP4</p>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
